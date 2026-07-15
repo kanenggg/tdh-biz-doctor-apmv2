@@ -4,5 +4,5 @@ metadata:
   name: p-bank
 spec:
   profile:
-    displayName: อ้ายแบงค์
+    displayName: P.bank
   memberOf: []
