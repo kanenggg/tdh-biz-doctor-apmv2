@@ -1,9 +1,11 @@
 apiVersion: backstage.io/v1alpha1
-kind: Location
+kind: API
 metadata:
-  name: tdh-biz-doctor-apmv2
-  description: Catalog entry point for the tdh-biz-doctor-apmv2 project
+  name: consultation-rs
+  description: Consultation service API
 spec:
-  type: file
-  targets:
-    - ./specs/provides/consultation-rs.yaml
+  type: openapi
+  lifecycle: production
+  owner: guests
+  definition:
+    $text: ./specs/provides/consultation-rs.yaml
