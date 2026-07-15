@@ -1,7 +1,22 @@
 apiVersion: backstage.io/v1alpha1
-kind: API
+kind: Component
 metadata:
   name: consultation-rs
+  description: Consultation API service
+spec:
+  type: service
+  lifecycle: production
+  owner: guests
+  providesApis:
+    - consultation-rs-api
+  consumesApis:
+    - walrus-apm-booking-gate
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: consultation-rs-api
   description: Consultation service API
 spec:
   type: openapi
@@ -9,3 +24,16 @@ spec:
   owner: guests
   definition:
     $text: ./specs/provides/consultation-rs.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: walrus-apm-booking-gate
+  description: Walrus APM booking gate API
+spec:
+  type: openapi
+  lifecycle: production
+  owner: guests
+  definition:
+    $text: ./specs/depends-on/walrus-apm-booking-gate.openapi.yaml
