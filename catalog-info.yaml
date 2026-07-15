@@ -34,6 +34,6 @@ metadata:
 spec:
   type: openapi
   lifecycle: production
-  owner: user:default/guests
+  owner: user:default/p-bank
   definition:
     $text: ./specs/depends-on/walrus-apm-booking-gate.openapi.yaml
