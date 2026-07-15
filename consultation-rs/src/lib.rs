@@ -1,0 +1,14 @@
+pub mod appointment;
+pub mod booking;
+pub mod common;
+pub mod consultation;
+pub mod consultation_config;
+pub mod doctor_timeslot;
+pub mod infra;
+pub mod internal;
+pub mod openapi;
+pub mod protocol;
+pub mod provider_callback;
+pub mod repo;
+pub mod summarization;
+pub mod sys;

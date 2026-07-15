@@ -1,0 +1,660 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Consultation API",
+    "description": "API for managing consultations and appointments",
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/v2/appointment/book": {
+      "post": {
+        "tags": [
+          "appointment"
+        ],
+        "operationId": "book",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Booking created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid slot time"
+          },
+          "409": {
+            "description": "Conflict - slot already booked"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/appointment/reserve": {
+      "post": {
+        "tags": [
+          "appointment"
+        ],
+        "operationId": "reserve",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReserveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Reservation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReserveResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - slot already booked or doctor not available"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/v2/appointment/{booking_id}/session-info": {
+      "get": {
+        "tags": [
+          "consultation"
+        ],
+        "operationId": "get_session_info",
+        "parameters": [
+          {
+            "name": "booking_id",
+            "in": "path",
+            "description": "Booking ID / Appointment ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Session info retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSessionInfoResult"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BookingRequest": {
+        "type": "object",
+        "required": [
+          "doctorId",
+          "bizUnitId",
+          "consultationChannel",
+          "bookingType",
+          "intake"
+        ],
+        "properties": {
+          "bizCenterId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "bizUnitId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingTypeRequest"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "doctorId": {
+            "type": "string"
+          },
+          "intake": {
+            "$ref": "#/components/schemas/PatientIntakeForm"
+          }
+        }
+      },
+      "BookingResponse": {
+        "type": "object",
+        "required": [
+          "bookingToken",
+          "bookingId",
+          "reservedFrom",
+          "reservedUntil"
+        ],
+        "properties": {
+          "bookingId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookingToken": {
+            "type": "string"
+          },
+          "reservedFrom": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reservedUntil": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "BookingType": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "instant"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "schedule"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "BookingTypeRequest": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "instant"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "slot_start_unix",
+              "slot_end_unix",
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "schedule"
+                ]
+              },
+              "slot_end_unix": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "slot_start_unix": {
+                "type": "integer",
+                "format": "int64"
+              }
+            }
+          }
+        ]
+      },
+      "ConsultationChannel": {
+        "type": "string",
+        "enum": [
+          "video",
+          "voice",
+          "chat"
+        ]
+      },
+      "GetSessionInfoResult": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionReady"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "__type"
+                ],
+                "properties": {
+                  "__type": {
+                    "type": "string",
+                    "enum": [
+                      "GetDoctorSessionInfo.SessionReady"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "GetDoctorSessionInfo.SessionNotFound"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "GetDoctorSessionInfo.SessionIsFinished"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "GetDoctorSessionInfo.SessionIsNotReady"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "GetDoctorSessionInfo.Unauthorized"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "PatientIdentity": {
+        "type": "object",
+        "required": [
+          "accountId",
+          "userProfileId",
+          "tenantId"
+        ],
+        "properties": {
+          "accountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "oidcUserId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tenantId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "userProfileId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PatientIntakeForm": {
+        "type": "object",
+        "required": [
+          "symptom",
+          "symptomDuration",
+          "symptomDurationUnit",
+          "attachments",
+          "allergies"
+        ],
+        "properties": {
+          "allergies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "symptom": {
+            "type": "string"
+          },
+          "symptomDuration": {
+            "type": "string"
+          },
+          "symptomDurationUnit": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderSessionInfo": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokBoxSessionInfo"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "__type"
+                ],
+                "properties": {
+                  "__type": {
+                    "type": "string",
+                    "enum": [
+                      "tokBox"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TwilioSessionInfo"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "__type"
+                ],
+                "properties": {
+                  "__type": {
+                    "type": "string",
+                    "enum": [
+                      "twilio"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "ReserveRequest": {
+        "type": "object",
+        "required": [
+          "patientIdentity",
+          "doctorId",
+          "bizUnitId",
+          "consultationChannel",
+          "bookingType",
+          "reservedFrom",
+          "reservationDurationSec"
+        ],
+        "properties": {
+          "bizCenterId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "bizUnitId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingType"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "doctorId": {
+            "type": "string"
+          },
+          "patientIdentity": {
+            "$ref": "#/components/schemas/PatientIdentity"
+          },
+          "reservationDurationSec": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reservedFrom": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "traceId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ReserveResponse": {
+        "type": "object",
+        "required": [
+          "bookingId",
+          "patientIdentity",
+          "doctorId",
+          "bizUnitId",
+          "consultationChannel",
+          "bookingType",
+          "reservedFrom",
+          "reservedUntil",
+          "reservationStatus",
+          "reservedAt"
+        ],
+        "properties": {
+          "bizCenterId": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
+          },
+          "bizUnitId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bookingId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingType"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "doctorId": {
+            "type": "string"
+          },
+          "patientIdentity": {
+            "$ref": "#/components/schemas/PatientIdentity"
+          },
+          "reservationStatus": {
+            "type": "string"
+          },
+          "reservedAt": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reservedFrom": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reservedUntil": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SessionReady": {
+        "type": "object",
+        "required": [
+          "sessionInfo",
+          "sessionStartTime",
+          "sessionEndTime",
+          "isFacialVerified",
+          "sessionChannel"
+        ],
+        "properties": {
+          "isFacialVerified": {
+            "type": "boolean"
+          },
+          "isRequiredPhoneVerification": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "sessionChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "sessionEndTime": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sessionInfo": {
+            "$ref": "#/components/schemas/ProviderSessionInfo"
+          },
+          "sessionStartTime": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TokBoxSessionInfo": {
+        "type": "object",
+        "required": [
+          "conferenceProviderId",
+          "sessionId",
+          "sessionToken",
+          "appointmentNo"
+        ],
+        "properties": {
+          "appointmentNo": {
+            "type": "string"
+          },
+          "conferenceProviderId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "sessionToken": {
+            "type": "string"
+          }
+        }
+      },
+      "TwilioSessionInfo": {
+        "type": "object",
+        "required": [
+          "sessionName",
+          "sessionToken"
+        ],
+        "properties": {
+          "sessionChatName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sessionName": {
+            "type": "string"
+          },
+          "sessionToken": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "appointment",
+      "description": "Appointment management API"
+    },
+    {
+      "name": "consultation",
+      "description": "Consultation session management API"
+    }
+  ]
+}

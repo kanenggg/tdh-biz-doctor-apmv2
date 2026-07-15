@@ -1,0 +1,306 @@
+templateVersion: v2
+versions:
+  v0.0.1:
+    revision: 8eb83289eb97aa55a982e2c85eaed15c3e8bb111
+    notes:
+    - 'timeslot: service that hold doctor timeslot information'
+    - 'timeslot-manager: shard manager for timeslot'
+    - 'consultation: service for booking and consultation related info e.g. medical
+      info, session status'
+    - 'consultation-bg-service: pubsub consumer for asynchronous activities e.g. scheduling
+      and notification'
+    services:
+    - timeslot
+    - timeslot-manager
+    - consultation
+    - consultation-bg-service
+  v0.0.2:
+    revision: 5fb7dfd4c26144c11970cee6668eea103f3ae6fe
+    notes:
+    - 'consultation: fix session creation retrying'
+    services:
+    - consultation
+  v0.0.3:
+    revision: f4532fe78be3f067355958062762cf8dd69009bd
+    notes:
+    - 'consultation: info level log'
+    services:
+    - consultation
+  v0.0.4:
+    revision: b4bda17ed1c73760c56d545f4070f7950c5a96dc
+    notes:
+    - 'timeslot: refine logging, improve rethinkdb connection reliability'
+    - 'consultation: refine logging'
+    services:
+    - timeslot
+    - consultation
+  v0.0.5:
+    revision: 78b53a5b85295a0e7c23599775282d82f7c87542
+    notes:
+    - 'consultation: improve rethinkdb connection reliability'
+    services:
+    - consultation
+  v0.0.6:
+    revision: ee3c3a80d891b46c2e5a63c24f8ba99e50a30aa8
+    notes:
+    - 'timeout: log error on entity creation failure'
+    services:
+    - timeslot
+  v0.0.7:
+    revision: 2e133879850c513c26886833ed2fed7cd47d977a
+    notes:
+    - update payment protocol to version 0.3.18
+    services:
+    - timeslot
+    - consultation-bg-service
+  v0.0.8:
+    revision: 2abf45c0a7c03145dcf3e5d28623fb7805c6c527
+    notes:
+    - 'timeslot: increase max heap size (fix shardcake timeout error)'
+    services:
+    - timeslot
+  v0.0.9:
+    revision: 30b2ac05238bd209f422591daa93f2edd3ba047c
+    notes:
+    - 'timeslot: fix shardcake send timeout error, validate pulse token'
+    services:
+    - timeslot
+  v0.0.10:
+    revision: 25eacb02f34fd45db9857ef3281545034241ea05
+    notes:
+    - 'timeslot: fix lost + expire version control, improve SinkGetAppointmentData'
+    services:
+    - timeslot
+  v0.0.11:
+    revision: 55e40e9d11d3b80ee044702901408f474f6f2499
+    notes:
+    - 'timeslot & consultation: remove api document for production env'
+    services:
+    - timeslot
+    - consultation
+  v0.0.12:
+    revision: d09ab1b892187532c491aeb6e682e66131a2532e
+    notes:
+    - 'timeslot & consultation-bg-service: update payment protocol to version 0.3.23'
+    - 'timeslot-manager & consultation: new deployment (for staging)'
+    services:
+    - timeslot
+    - timeslot-manager
+    - consultation
+    - consultation-bg-service
+  v0.0.13:
+    revision: c33f7939f88203d96cb251496d491b4a120eb040
+    notes:
+    - 'consultation: remove orDie from http client logic, add consultation screenshot upload endpoints'
+    services:
+    - consultation
+  v0.0.14:
+    revision: b7d5220448df7c1fa13831df04cdba31aa9d27d6
+    notes:
+    - 'consultation: add isFacialVerified flag for doctor getSessionInfo'
+    services:
+    - consultation
+  v0.0.15:
+    revision: f57cb06089da2e60b891db3b2bea928a6370291d
+    notes:
+    - 'consultation: bump version add isFacialVerified flag for doctor getSessionInfo'
+    services:
+    - consultation
+  v0.0.15r3:
+    notes:
+      - 'test pipeline'
+    services:
+      - consultation
+  v0.0.16:
+    notes:
+      - 'test pipeline'
+    services:
+      - consultation
+  v0.0.17:
+    notes:
+      - 'consultation: fix bypass facial verification on voice/chat channel'
+    services:
+      - consultation
+  v0.0.18:
+    notes:
+      - 'screenshot composition system: screenshot-accumulator, screenshot-scheduler, and screenshot-composer'
+      - 'consultation: redeploy v0.0.17'
+    services:
+      - consultation
+      - screenshot-accumulator
+      - screenshot-scheduler
+      - screenshot-composer
+  v0.0.19:
+    notes:
+      - 'screenshot-accumulator: fix gcs file name regex'
+    services:
+      - screenshot-accumulator
+  v0.0.20:
+    notes:
+      - 'redeploy: consultation, screenshot-accumulator, scheduler, composer from v0.0.18-v0.0.19'
+    services:
+      - consultation
+      - screenshot-accumulator
+      - screenshot-scheduler
+      - screenshot-composer
+  v0.0.21:
+    notes:
+      - 'screenshot-composer: support changing gdrive saving folder based on timezone'
+    services:
+      - screenshot-composer
+  v0.0.22:
+    notes:
+      - 'screenshot-composer: add retry'
+    services:
+      - screenshot-composer
+  v0.0.23:
+    notes:
+      - 'timeslot: update payment protocol'
+    services:
+      - timeslot
+  v0.0.24:
+    notes:
+      - 'timeslot: add izumi tag to sink'
+    services:
+      - timeslot
+  v0.0.25:
+    notes:
+      - 'timeslot: try fix izumi tag'
+    services:
+      - timeslot
+  v0.0.26:
+    notes:
+      - 'timeslot: add feature book/cancel appointment from dolphin-wellness'
+    services:
+      - timeslot
+  v0.0.27:
+    notes:
+      - 'add module common-db'
+    services:
+      - common-db
+  v0.0.28:
+    notes:
+      - 'support payment protocol v0.5.3, payment pubsub v0.2.1'
+      - 'consultation: fix end session retry logic'
+    services:
+      - timeslot
+      - consultation
+      - consultation-bg-service
+  v0.0.29:
+    notes:
+      - 'timeslot: feature: follow-up appointment'
+      - 'consultation: feature: follow-up appointment, unsupport tokbox session'
+    services:
+      - timeslot
+      - consultation
+  v0.0.30:
+    notes:
+      - 'timeslot: fix cancel follow-up cancel query'
+      - 'consultation: fix follow-up confirmation expire bug, refactor'
+      - 'consultation-bg: refactor'
+    services:
+      - timeslot
+      - consultation
+      - consultation-bg-service
+  v0.0.31:
+    notes:
+      - 'consultation: fix publish message error'
+      - 'other service deploy to just align with version release of follow-up feature'
+    services:
+      - timeslot
+      - consultation
+      - consultation-bg-service
+  v0.0.32:
+    notes:
+      - 'consultation-bg: fix zenvironment defect'
+      - 'other service deploy to just align with version release of follow-up feature'
+    services:
+      - timeslot
+      - consultation
+      - consultation-bg-service
+  v0.0.33:
+    notes:
+      - 'consultation & timeslot: add proper wording for follow up appointment details'
+    services:
+      - timeslot
+      - consultation
+  v0.1.0:
+    notes:
+      - 'support payment support payment protocol v0.6.18'
+    services:
+      - timeslot
+      - consultation
+      - consultaiton-bg-service
+  v0.1.1:
+    notes:
+      - 'followup: allow patient absence appointment to create follow up'
+    services:
+      - consultation
+  v0.1.2:
+    notes:
+      - 'consultation: temp remove legacy psql config for follow up deployment'
+    services:
+      - consultation
+  v0.2.0:
+    notes:
+      - 'apm protocol v1.6.0: introducing consultation event'
+      - 'support legacy database migration flag from mssql to pgsql'
+      - 'consultation: revise session status update flow (fix appointment status randomly not update properly)'
+    services:
+      - consultation
+      - consultation-bg-service
+      - timeslot
+  v0.2.1:
+    notes:
+      - "consult-bg: set default medicine image url for legacy prescription"
+    services:
+      - consultation-bg-service
+  v0.2.2:
+    notes:
+      - "consult-bg: fix incorrect medicine prescription"
+    services:
+      - consultation-bg-service
+  v0.2.3:
+    notes:
+      - "consultation: extend follow up 45 days"
+    services:
+      - consultation
+  v0.2.4:
+    notes:
+      - "publish doctor state instant"
+    services:
+      - timeslot
+  v0.2.5:
+    notes:
+      - "publish doctor state instant"
+    services:
+      - consultation
+      - consultation-bg-service
+      - timeslot
+      - timeslot-manager
+      - screenshot-accumulator
+      - screenshot-scheduler
+      - screenshot-composer
+  v0.3.0:
+    notes:
+      - "initial release of nhso-evidence service"
+    services:
+      - nhso-evidence
+  v0.3.1:
+    notes:
+      - "Hotfix doctor cannot join session"
+  v0.3.2:
+    notes:
+      - "remove unuse gcp logging middleware"
+  v0.3.3:
+    notes:
+      - "HOTFIX com.github.jasync.sql.db.postgresql.exceptions.GenericDatabaseException"
+  v0.3.4:
+    notes:
+      - "HOTFIX from 0.3.3 add log to monitor twilio response"
+  v0.3.5:
+    notes:
+      - "support dolphin can book general doctor"
+  v0.3.6:
+    notes:
+      - "support dolphin can book general doctor"

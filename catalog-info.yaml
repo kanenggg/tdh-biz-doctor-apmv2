@@ -1,0 +1,9 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: tdh-biz-doctor-apmv2
+  description: Catalog entry point for the tdh-biz-doctor-apmv2 project
+spec:
+  type: file
+  targets:
+    - ./specs/provides/consultation-rs.yaml

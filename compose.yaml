@@ -1,0 +1,116 @@
+services:
+  redis:
+    container_name: doctor-apm-redis
+    image: redis:6-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  insight:
+    container_name: doctor-apm-redis-insight
+    image: redis/redisinsight
+    ports:
+      - "5540:5540"
+    # depends_on:
+    #   redis:
+    #     condition: service_healthy
+    # environment:
+    #   - REDIS_HOST=192.168.1.112
+    #   - REDIS_PORT=6379
+    #
+  # rethinkdb:
+  #   image: rethinkdb:2.4
+  #   ports:
+  #     - "8080:8080"
+  #     - "28015:28015"
+  #     - "29015:29015"
+  #   volumes:
+  #     - rethinkdb_data:/data
+
+  postgres:
+    container_name: doctor-apm-postgres
+    image: postgres:15-alpine
+    ports:
+      - "54321:5432"
+    environment:
+      POSTGRES_USER: biz_apm_admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: biz_apm
+    volumes:
+      - ./db/biz_apm/migrations/:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U biz_apm_admin -d biz_apm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    container_name: doctor-apm-migrate
+    image: asia-southeast1-docker.pkg.dev/tdg-dh-truehealth-core-nonprod/infra-starfish-docker/pgdb-script-runner:537038d
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    volumes:
+      - ./db/biz_apm:/db/biz_apm
+    environment:
+      PGPASSWORD: "${POSTGRES__PASSWORD:-password}"
+      DB_ADMIN_USER: biz_apm_admin
+      DB_ADMIN_USER_PASS: password
+      DB_NAME: "${POSTGRES__DB:-biz_apm}"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER_ADMIN_NAME: biz_apm_admin
+      DB_USER_ADMIN_PASS: password
+      DB_USER_SERVICE_RW_NAME: biz_apm_rw
+      DB_USER_SERVICE_RW_PASS: password
+      DB_USER_SERVICE_RO_NAME: biz_apm_ro
+      DB_USER_SERVICE_RO_PASS: password
+      DB_SERVICE_RW_USER: biz_apm_rw
+      DB_SERVICE_RO_USER: biz_apm_ro
+      APMV2_HOLD_CUTOVER_READY: "${APMV2_HOLD_CUTOVER_READY:-false}"
+    command: >
+      sh -c "
+        set -e;
+        until sh /db/biz_apm/migrate.sh; do
+          echo 'Migration failed, retrying in 5 seconds...';
+          sleep 5;
+        done;
+        echo 'Migration completed successfully';
+      "
+  pubsub-emulator:
+    container_name: doctor-apm-pubsub-emulator
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    ports:
+      - "8085:8085"
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085 --project=test-project
+
+  # seed-db:
+  #   container_name: doctor-apm-seed-db
+  #   image: postgres:15-alpine
+  #   environment:
+  #     PGPASSWORD: password
+  #     SEED_CONCERN: ${SEED_CONCERN:-}
+  #   volumes:
+  #     - ./db/postgres:/seeds
+  #     - ./db/postgres/seeds/run.sh:/run-seeds.sh:ro
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   command: >
+  #     sh -c "
+  #       until psql -h postgres -U biz_apm_admin -d biz_apm -c 'SELECT 1'; do
+  #         echo 'Waiting for postgres...'
+  #         sleep 2
+  #       done
+  #       chmod +x /run-seeds.sh
+  #       DB_HOST=postgres DB_PORT=5432 DB_NAME=biz_apm DB_USER=biz_apm_admin DB_PASSWORD=password /run-seeds.sh \$$SEED_CONCERN
+  #     "
+
+volumes:
+  redis_data:
+  rethinkdb_data:
+  postgres_data:

@@ -1,0 +1,1086 @@
+asyncapi: 3.1.0
+info:
+  title: Biz APM Consultation Event V2
+  version: 1.0.0-rc0
+  description: >
+    Draft AsyncAPI contract for the full Biz APM consultation event V2 serde
+    JSON payloads derived from
+    tdh-biz-doctor-apmv2/common-rs/src/event/biz_apm/consultation_event/v2.rs.
+    Payloads use the Rust internally tagged enum discriminator __type. This
+    draft names the intended Pub/Sub stream consultation-event-v2. It is a
+    model/contract artifact; production publication remains V1-only pending an
+    explicitly approved rollout.
+defaultContentType: application/json
+channels:
+  consultation-event-v2:
+    address: consultation-event-v2
+    messages:
+      publishBizApmConsultationEventV2.message.0:
+        $ref: '#/components/messages/TimeslotReserved'
+      publishBizApmConsultationEventV2.message.1:
+        $ref: '#/components/messages/ReservationCancelled'
+      publishBizApmConsultationEventV2.message.2:
+        $ref: '#/components/messages/ReservationExpired'
+      publishBizApmConsultationEventV2.message.3:
+        $ref: '#/components/messages/ConsultationBooked'
+      publishBizApmConsultationEventV2.message.4:
+        $ref: '#/components/messages/ConsultationCancelled'
+      publishBizApmConsultationEventV2.message.5:
+        $ref: '#/components/messages/SessionCreated'
+      publishBizApmConsultationEventV2.message.6:
+        $ref: '#/components/messages/PatientJoined'
+      publishBizApmConsultationEventV2.message.7:
+        $ref: '#/components/messages/DoctorJoined'
+      publishBizApmConsultationEventV2.message.8:
+        $ref: '#/components/messages/AllParticipantJoined'
+      publishBizApmConsultationEventV2.message.9:
+        $ref: '#/components/messages/PatientDisconnected'
+      publishBizApmConsultationEventV2.message.10:
+        $ref: '#/components/messages/DoctorDisconnected'
+      publishBizApmConsultationEventV2.message.11:
+        $ref: '#/components/messages/SessionTerminated'
+      publishBizApmConsultationEventV2.message.12:
+        $ref: '#/components/messages/FollowUpRequired'
+      publishBizApmConsultationEventV2.message.13:
+        $ref: '#/components/messages/FollowUpRequestExpired'
+      publishBizApmConsultationEventV2.message.14:
+        $ref: '#/components/messages/PatientAcceptedFollowUp'
+      publishBizApmConsultationEventV2.message.15:
+        $ref: '#/components/messages/FollowUpCancelled'
+      publishBizApmConsultationEventV2.message.16:
+        $ref: '#/components/messages/ConsultationSummarized'
+    description: >
+      Consultation event stream for Biz APM consultation V2 events. Note:
+      runtime rollout configuration selects this topic when V2 publishing is
+      enabled.
+operations:
+  publishBizApmConsultationEventV2:
+    action: send
+    channel:
+      $ref: '#/channels/consultation-event-v2'
+    summary: Publish Biz APM consultation V2 events.
+    messages:
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.0
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.1
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.2
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.3
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.4
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.5
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.6
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.7
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.8
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.9
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.10
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.11
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.12
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.13
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.14
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.15
+      - $ref: >-
+          #/channels/consultation-event-v2/messages/publishBizApmConsultationEventV2.message.16
+components:
+  messages:
+    TimeslotReserved:
+      name: TimeslotReserved
+      title: Timeslot reserved
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/TimeslotReservedEvent'
+    ReservationCancelled:
+      name: ReservationCancelled
+      title: Reservation cancelled
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/ReservationCancelledEvent'
+    ReservationExpired:
+      name: ReservationExpired
+      title: Reservation expired
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/ReservationExpiredEvent'
+    ConsultationBooked:
+      name: ConsultationBooked
+      title: Consultation booked
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/ConsultationBookedEvent'
+    ConsultationCancelled:
+      name: ConsultationCancelled
+      title: Consultation cancelled
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/ConsultationCancelledEvent'
+    SessionCreated:
+      name: SessionCreated
+      title: Session created
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/SessionCreatedEvent'
+    PatientJoined:
+      name: PatientJoined
+      title: Patient joined
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/PatientJoinedEvent'
+    DoctorJoined:
+      name: DoctorJoined
+      title: Doctor joined
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/DoctorJoinedEvent'
+    AllParticipantJoined:
+      name: AllParticipantJoined
+      title: All participant joined
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/AllParticipantJoinedEvent'
+    PatientDisconnected:
+      name: PatientDisconnected
+      title: Patient disconnected
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/PatientDisconnectedEvent'
+    DoctorDisconnected:
+      name: DoctorDisconnected
+      title: Doctor disconnected
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/DoctorDisconnectedEvent'
+    SessionTerminated:
+      name: SessionTerminated
+      title: Session terminated
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/SessionTerminatedEvent'
+    FollowUpRequired:
+      name: FollowUpRequired
+      title: Follow-up required
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/FollowUpRequiredEvent'
+    FollowUpRequestExpired:
+      name: FollowUpRequestExpired
+      title: Follow-up request expired
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/FollowUpRequestExpiredEvent'
+    PatientAcceptedFollowUp:
+      name: PatientAcceptedFollowUp
+      title: Patient accepted follow-up
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/PatientAcceptedFollowUpEvent'
+    FollowUpCancelled:
+      name: FollowUpCancelled
+      title: Follow-up cancelled
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/FollowUpCancelledEvent'
+    ConsultationSummarized:
+      name: ConsultationSummarized
+      title: Consultation summarized
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        $ref: '#/components/schemas/ConsultationSummarizedEvent'
+  schemas:
+    PubSubHeaders:
+      type: object
+      required:
+        - event_type
+      properties:
+        event_type:
+          type: string
+          description: Pub/Sub attribute carrying the BizApmConsultationEvent variant name.
+          enum:
+            - TimeslotReserved
+            - ReservationCancelled
+            - ReservationExpired
+            - ConsultationBooked
+            - ConsultationCancelled
+            - SessionCreated
+            - PatientJoined
+            - DoctorJoined
+            - AllParticipantJoined
+            - PatientDisconnected
+            - DoctorDisconnected
+            - SessionTerminated
+            - FollowUpRequired
+            - FollowUpRequestExpired
+            - PatientAcceptedFollowUp
+            - FollowUpCancelled
+            - ConsultationSummarized
+        messageId:
+          type: string
+          description: Optional Pub/Sub transport message id.
+        publishTime:
+          type: string
+          format: date-time
+          description: Optional Pub/Sub transport publish time.
+    BizApmConsultationEvent:
+      oneOf:
+        - $ref: '#/components/schemas/TimeslotReservedEvent'
+        - $ref: '#/components/schemas/ReservationCancelledEvent'
+        - $ref: '#/components/schemas/ReservationExpiredEvent'
+        - $ref: '#/components/schemas/ConsultationBookedEvent'
+        - $ref: '#/components/schemas/ConsultationCancelledEvent'
+        - $ref: '#/components/schemas/SessionCreatedEvent'
+        - $ref: '#/components/schemas/PatientJoinedEvent'
+        - $ref: '#/components/schemas/DoctorJoinedEvent'
+        - $ref: '#/components/schemas/AllParticipantJoinedEvent'
+        - $ref: '#/components/schemas/PatientDisconnectedEvent'
+        - $ref: '#/components/schemas/DoctorDisconnectedEvent'
+        - $ref: '#/components/schemas/SessionTerminatedEvent'
+        - $ref: '#/components/schemas/FollowUpRequiredEvent'
+        - $ref: '#/components/schemas/FollowUpRequestExpiredEvent'
+        - $ref: '#/components/schemas/PatientAcceptedFollowUpEvent'
+        - $ref: '#/components/schemas/FollowUpCancelledEvent'
+        - $ref: '#/components/schemas/ConsultationSummarizedEvent'
+      discriminator: __type
+    TimeslotReservedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - bizUnitId
+        - occupyFrom
+        - occupyUntil
+        - consultationChannel
+        - reservedAt
+      properties:
+        __type:
+          type: string
+          const: TimeslotReserved
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        bizUnitId:
+          type: integer
+          format: int32
+        occupyFrom:
+          type: integer
+          format: int64
+        occupyUntil:
+          type: integer
+          format: int64
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        reservedAt:
+          type: integer
+          format: int64
+    ReservationCancelledEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - cancelledBy
+        - cancelledAt
+      properties:
+        __type:
+          type: string
+          const: ReservationCancelled
+        bookingId:
+          type: string
+        cancelledBy:
+          type: string
+        cancelledAt:
+          type: integer
+          format: int64
+    ReservationExpiredEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - expiredAt
+      properties:
+        __type:
+          type: string
+          const: ReservationExpired
+        bookingId:
+          type: string
+        expiredAt:
+          type: integer
+          format: int64
+    ConsultationBookedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - doctorInfo
+        - bizUnitId
+        - bookingType
+        - consultationStartTime
+        - consultationDurationSec
+        - consultationChannel
+        - patientInTake
+        - consultationFee
+        - platformFee
+        - bookedAt
+        - confirmedAt
+        - paymentTransactionId
+      properties:
+        __type:
+          type: string
+          const: ConsultationBooked
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorInfo:
+          $ref: '#/components/schemas/PartialDoctorInfo'
+        bizUnitId:
+          type: integer
+          format: int32
+        bookingType:
+          $ref: '#/components/schemas/BookingType'
+        consultationStartTime:
+          type: integer
+          format: int64
+        consultationDurationSec:
+          type: integer
+          format: int32
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        patientInTake:
+          $ref: '#/components/schemas/PatientInTakeData'
+        consultationFee:
+          type: number
+          format: double
+        platformFee:
+          type: number
+          format: double
+        bookedAt:
+          type: integer
+          format: int64
+        confirmedAt:
+          type: integer
+          format: int64
+        paymentTransactionId:
+          type: integer
+          format: int32
+    ConsultationCancelledEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - bizUnitId
+        - paymentTransactionId
+        - cancelCode
+        - cancelledAt
+      properties:
+        __type:
+          type: string
+          const: ConsultationCancelled
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        bizUnitId:
+          type: integer
+          format: int32
+        paymentTransactionId:
+          type: integer
+          format: int32
+        cancelCode:
+          type: string
+        cancelledAt:
+          type: integer
+          format: int64
+    SessionCreatedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - sessionProvider
+        - consultationStartTime
+        - consultationDurationInSecond
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: SessionCreated
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        sessionProvider:
+          type: string
+          description: >-
+            String in SessionCreatedEvent even though v2.rs also defines a
+            SessionProvider enum.
+        consultationStartTime:
+          type: integer
+          format: int64
+        consultationDurationInSecond:
+          type: integer
+          format: int32
+        createdAt:
+          type: integer
+          format: int64
+    PatientJoinedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - joinedAt
+      properties:
+        __type:
+          type: string
+          const: PatientJoined
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        joinedAt:
+          type: integer
+          format: int64
+    DoctorJoinedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - joinedAt
+      properties:
+        __type:
+          type: string
+          const: DoctorJoined
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        joinedAt:
+          type: integer
+          format: int64
+    AllParticipantJoinedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - patientJoinedAt
+        - doctorJoinedAt
+      properties:
+        __type:
+          type: string
+          const: AllParticipantJoined
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        patientJoinedAt:
+          type: integer
+          format: int64
+        doctorJoinedAt:
+          type: integer
+          format: int64
+    PatientDisconnectedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - disconnectedAt
+      properties:
+        __type:
+          type: string
+          const: PatientDisconnected
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        disconnectedAt:
+          type: integer
+          format: int64
+    DoctorDisconnectedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - disconnectedAt
+      properties:
+        __type:
+          type: string
+          const: DoctorDisconnected
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        disconnectedAt:
+          type: integer
+          format: int64
+    SessionTerminatedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - terminationCode
+        - terminatedBy
+        - terminatedAt
+      properties:
+        __type:
+          type: string
+          const: SessionTerminated
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        terminationCode:
+          $ref: '#/components/schemas/TerminationCode'
+        terminatedBy:
+          $ref: '#/components/schemas/SessionParticipant'
+        terminatedAt:
+          type: integer
+          format: int64
+    FollowUpRequiredEvent:
+      type: object
+      required:
+        - __type
+        - previousBookingId
+        - followUpId
+        - patientIdentity
+        - doctorId
+        - bizUnitId
+        - consultationStartTime
+        - consultationDurationInSecond
+        - consultationFee
+        - consultationChannel
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: FollowUpRequired
+        previousBookingId:
+          type: string
+        followUpId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: string
+          format: uuid
+        bizUnitId:
+          type: integer
+          format: int32
+        consultationStartTime:
+          type: integer
+          format: int64
+        consultationDurationInSecond:
+          type: integer
+          format: int32
+        consultationFee:
+          type: number
+          format: double
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        additionalPatientNote:
+          type: string
+          nullable: true
+          description: Optional and skipped by serde when None.
+        internalNote:
+          type: string
+          nullable: true
+          description: Optional and skipped by serde when None.
+        createdAt:
+          type: integer
+          format: int64
+    FollowUpRequestExpiredEvent:
+      type: object
+      required:
+        - __type
+        - previousBookingId
+        - followUpId
+        - doctorId
+        - patientIdentity
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: FollowUpRequestExpired
+        previousBookingId:
+          type: string
+        followUpId:
+          type: string
+        doctorId:
+          type: string
+          format: uuid
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        createdAt:
+          type: integer
+          format: int64
+    PatientAcceptedFollowUpEvent:
+      type: object
+      required:
+        - __type
+        - previousBookingId
+        - followUpId
+        - patientIdentity
+        - doctorId
+        - consultationStartTime
+        - consultationDurationInSecond
+        - consultationFee
+        - symptoms
+        - consultationChannel
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: PatientAcceptedFollowUp
+        previousBookingId:
+          type: string
+        followUpId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: string
+          format: uuid
+        consultationStartTime:
+          type: integer
+          format: int64
+        consultationDurationInSecond:
+          type: integer
+          format: int32
+        consultationFee:
+          type: number
+          format: double
+        symptoms:
+          type: string
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        createdAt:
+          type: integer
+          format: int64
+    FollowUpCancelledEvent:
+      type: object
+      required:
+        - __type
+        - previousBookingId
+        - followUpId
+        - patientIdentity
+        - doctorId
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: FollowUpCancelled
+        previousBookingId:
+          type: string
+        followUpId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: string
+          format: uuid
+        createdAt:
+          type: integer
+          format: int64
+    ConsultationSummarizedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorIdentity
+        - doctorNote
+        - prescriptionInfo
+        - summarizedAt
+      properties:
+        __type:
+          type: string
+          const: ConsultationSummarized
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorNote:
+          type: string
+        prescriptionInfo:
+          $ref: '#/components/schemas/PrescriptionInfo'
+        summarizedAt:
+          type: integer
+          format: int64
+    PartialUserIdentity:
+      type: object
+      required:
+        - accountId
+        - userProfileId
+        - tenantId
+      properties:
+        accountId:
+          type: integer
+          format: int32
+        userProfileId:
+          type: integer
+          format: int32
+        tenantId:
+          type: integer
+          format: int32
+        oidcUserId:
+          type: string
+          nullable: true
+          description: Optional and skipped by serde when None.
+    PartialDoctorInfo:
+      type: object
+      required:
+        - doctorId
+        - firstName
+        - lastName
+        - departmentId
+      properties:
+        doctorId:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        departmentId:
+          type: integer
+          format: int32
+    PatientInTakeData:
+      description: Externally tagged patient intake data from the V2 event model.
+      oneOf:
+        - type: object
+          required:
+            - MordeeApp
+          properties:
+            MordeeApp:
+              type: object
+              required:
+                - symptom
+                - duration
+                - durationUnit
+                - attachments
+                - allergies
+              properties:
+                symptom:
+                  type: string
+                duration:
+                  type: integer
+                  format: int32
+                durationUnit:
+                  type: string
+                attachments:
+                  type: array
+                  items:
+                    type: string
+                allergies:
+                  type: array
+                  items:
+                    type: string
+        - type: object
+          required:
+            - Nhso
+          properties:
+            Nhso:
+              type: object
+              required:
+                - symptomId
+                - symptomType
+              properties:
+                symptomId:
+                  type: integer
+                  format: int32
+                symptomType:
+                  type: string
+                givenDetail:
+                  type: string
+                  nullable: true
+    BookingType:
+      description: Internally tagged BookingType enum using __type.
+      oneOf:
+        - type: object
+          required:
+            - __type
+          properties:
+            __type:
+              type: string
+              const: scheduled
+        - type: object
+          required:
+            - __type
+          properties:
+            __type:
+              type: string
+              const: instant
+      discriminator: __type
+    ConsultationChannel:
+      type: string
+      enum:
+        - video
+        - chat
+        - voice
+    SessionParticipant:
+      description: Internally tagged participant enum using __type.
+      oneOf:
+        - type: object
+          required: [__type]
+          properties:
+            __type:
+              const: patient
+        - type: object
+          required: [__type]
+          properties:
+            __type:
+              const: doctor
+        - type: object
+          required: [__type]
+          properties:
+            __type:
+              const: system
+      discriminator: __type
+    TerminationCode:
+      description: >
+        Internally tagged TerminationCode enum using __type. Struct variant
+        fields use camelCase for compatibility with protocol JSON.
+      oneOf:
+        - type: object
+          required:
+            - __type
+          properties:
+            __type:
+              type: string
+              const: SuccessfulSession
+        - type: object
+          required:
+            - __type
+          properties:
+            __type:
+              type: string
+              const: PatientAbsent
+        - type: object
+          required:
+            - __type
+            - patientJoinedAt
+          properties:
+            __type:
+              type: string
+              const: DoctorAbsent
+            patientJoinedAt:
+              type: integer
+              format: int64
+        - type: object
+          required:
+            - __type
+          properties:
+            __type:
+              type: string
+              const: BothPartiesAbsent
+        - type: object
+          required:
+            - __type
+            - errorMessage
+          properties:
+            __type:
+              type: string
+              const: TechnicalError
+            errorMessage:
+              type: string
+        - type: object
+          required:
+            - __type
+          properties:
+            __type:
+              type: string
+              const: PatientVerificationMissMatch
+      discriminator: __type
+    Medicine:
+      type: object
+      required:
+        - medicineId
+        - pricePlanId
+        - medicineAmount
+        - medicineNameTh
+        - medicineNameEn
+        - medicineInstructionEn
+        - medicineInstructionTh
+        - medicineImageUrl
+        - medicineUnitPrice
+      properties:
+        medicineId:
+          type: integer
+          format: int32
+        pricePlanId:
+          type: integer
+          format: int32
+        medicineAmount:
+          type: integer
+          format: int32
+        medicineNameTh:
+          type: string
+        medicineNameEn:
+          type: string
+        medicineInstructionEn:
+          type: string
+        medicineInstructionTh:
+          type: string
+        medicineImageUrl:
+          type: string
+        medicineUnitPrice:
+          type: number
+          format: double
+    PrescriptionInfo:
+      type: object
+      required:
+        - prescriptionRefcode
+        - medicineItems
+        - expireAt
+      properties:
+        prescriptionRefcode:
+          type: string
+        medicineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/Medicine'
+        expireAt:
+          type: integer
+          format: int64
+    Icd10:
+      type: object
+      required:
+        - code
+        - description
+      properties:
+        code:
+          type: string
+        description:
+          type: string
+    DurationUnit:
+      type: object
+      required:
+        - unit
+        - value
+      properties:
+        unit:
+          type: string
+        value:
+          type: integer
+          format: int32
+    DrugAllergy:
+      type: object
+      required:
+        - id
+        - displayName
+      properties:
+        id:
+          type: integer
+          format: int32
+        displayName:
+          type: string
+    DoctorNoteV2:
+      type: object
+      required:
+        - presentIllness
+        - chiefComplaint
+        - diagnosis
+        - recommendations
+        - icd10
+        - illnessDuration
+        - noteToStaff
+      properties:
+        prescriptionId:
+          type: integer
+          format: int64
+          nullable: true
+        presentIllness:
+          type: string
+        chiefComplaint:
+          type: string
+        diagnosis:
+          type: string
+        recommendations:
+          type: string
+        icd10:
+          type: array
+          items:
+            $ref: '#/components/schemas/Icd10'
+        illnessDuration:
+          $ref: '#/components/schemas/DurationUnit'
+        noteToStaff:
+          type: string
+        drugAllergies:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/DrugAllergy'
+    SessionProvider:
+      type: string
+      enum:
+        - Twilio
+        - TokBox
+        - Zoom

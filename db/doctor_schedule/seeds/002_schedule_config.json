@@ -1,0 +1,45 @@
+{
+  "routine": [
+    {
+      "dayOfWeek": 0,
+      "times": [
+        {
+          "startTime": "10:00",
+          "endTime": "12:00"
+        },
+        {
+          "startTime": "14:00",
+          "endTime": "16:00"
+        }
+      ]
+    },
+    {
+      "dayOfWeek": 0,
+      "times": [
+        {
+          "startTime": "17:00",
+          "endTime": "18:00"
+        }
+      ]
+    }
+  ],
+  "adHoc": [
+    {
+      "date": "2026-02-15",
+      "times": [
+        {
+          "startTime": "10:00",
+          "endTime": "12:00"
+        },
+        {
+          "startTime": "14:00",
+          "endTime": "16:00"
+        }
+      ]
+    },
+    {
+      "date": "2026-02-15",
+      "times": null
+    }
+  ]
+}

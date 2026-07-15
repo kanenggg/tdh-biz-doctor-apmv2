@@ -1,0 +1,11 @@
+{
+  "__type": "EmptyRoomCreated",
+  "sessionChannel": {
+    "__type": "Video",
+    "sessionId": "RM4ca6121b20530c8de38bc83fa5230cf3",
+    "recordingUrl": "CiUAOAX+UT1OJGeLWGQq/ufPswholRjLwshcqOL8Iwnkdls7ZbaUEncAwGAIWt/fkvKzQ2XparEBW/Szm3g95/0MziupWZ6E2uYJO11sPVegw8HD/fQaEM+mEtN+3+tSwg5ACVgCsHtQPjF5sIoZd/8M1U3MSPIbnsXWTys9q+0MF71tiUHkb0XcMFI1rKupm1LrQlPH7iyqGqI+cg6ASQ==",
+    "sessionChatId": "CHc32c731d1d0e40e8884a5fba462adfac",
+    "chatRecordingUrl": "CiUAOAX+UefMjDUcNlIlXanMiRmIU8NX7SyN+rehLnWhJge3D9DEEoUBAMBgCFrRoe0lx3lceCaW3UYrdC4T/l+jQw+MmxD+aoHqesyCEp79dUoqq2DDunGRLV65kXIwT53iBBLyK+6JB35V7n5m4DezlYUB6I57FkwZRxNhzWuOB+HgDH9nDBYJOXJrVIFqbirhcJZrtQ+Fb1HG7ItUEiHGOYEZWkoPIFLtSQHGGg==",
+    "sessionChatServiceId": "ISf60c7f45aa3f4fa186a23deaf579b70d"
+  }
+}

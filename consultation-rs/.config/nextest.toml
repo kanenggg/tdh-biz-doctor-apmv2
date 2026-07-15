@@ -1,0 +1,8 @@
+[profile.default]
+# Run integration tests sequentially to avoid database race conditions
+test-threads = 1
+
+[profile.default.overrides]
+# Allow unit tests to run in parallel
+filter = 'not test(repo_integration_test)'
+threads-required = 1

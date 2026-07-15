@@ -1,0 +1,10 @@
+### Get appointment detail
+# 20260526054842102
+@_bookingId=20260713090636756
+
+GET {{ HOST }}/internal/v2/appointment/{{_bookingId}} HTTP/1.1
+Content-Type: application/json
+
+### xxx
+GET {{ HOST }}/v2/internal/appointment/{{_bookingId}} HTTP/1.1
+Content-Type: application/json

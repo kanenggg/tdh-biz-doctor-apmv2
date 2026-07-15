@@ -1,0 +1,102 @@
+### Submit summary note - Success case
+
+POST {{ HOST }}/internal/v1/summary-note HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "bookingId": "10021",
+  "prescriptionId": null,
+  "presentIllness": "Patient has fever and cough",
+  "chiefComplaint": "Fever for 3 days",
+  "diagnosis": "Upper respiratory infection",
+  "recommendations": "Rest and drink plenty of fluids",
+  "icd10": [
+    {
+      "code": "J00",
+      "description": "Acute nasopharyngitis"
+    },
+    {
+      "code": "R50",
+      "description": "Fever"
+    }
+  ],
+  "illnessDuration": {
+    "value": 3,
+    "unit": "days"
+  },
+  "noteToStaff": "Patient allergic to penicillin",
+  "followUp": {
+    "__type": "AsNeeded"
+  }
+}
+
+### Submit summary note - Minimal case
+
+POST {{ HOST }}/e2e/v1/summary-note HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "bookingId": "10022",
+  "prescriptionId": null,
+  "presentIllness": null,
+  "chiefComplaint": "Headache",
+  "diagnosis": null,
+  "recommendations": null,
+  "icd10": [],
+  "illnessDuration": null,
+  "noteToStaff": null
+}
+
+### Submit summary note - With prescription ID
+
+POST {{ HOST }}/e2e/v1/summary-note HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "bookingId": "10023",
+  "prescriptionId": 12345,
+  "presentIllness": "Patient complains of back pain",
+  "chiefComplaint": "Lower back pain",
+  "diagnosis": "Muscle strain",
+  "recommendations": "Physical therapy and rest",
+  "icd10": [
+    {
+      "code": "M54.5",
+      "description": "Low back pain"
+    }
+  ],
+  "illnessDuration": {
+    "value": 7,
+    "unit": "days"
+  },
+  "noteToStaff": "Follow up in 2 weeks"
+}
+
+### Submit summary note - Idempotent test (same bookingId)
+
+POST {{ HOST }}/e2e/v1/summary-note HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "bookingId": "10021",
+  "prescriptionId": null,
+  "presentIllness": "Patient has fever and cough",
+  "chiefComplaint": "Fever for 3 days",
+  "diagnosis": "Upper respiratory infection",
+  "recommendations": "Rest and drink plenty of fluids",
+  "icd10": [
+    {
+      "code": "J00",
+      "description": "Acute nasopharyngitis"
+    }
+  ],
+  "illnessDuration": {
+    "value": 3,
+    "unit": "days"
+  },
+  "noteToStaff": "Patient allergic to penicillin"
+}

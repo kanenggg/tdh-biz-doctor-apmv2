@@ -1,0 +1,54 @@
+### Create confirmed (instant) appointment — captures booking_id into confirmedBookingId
+
+POST {{ HOST }}/internal/v2/create-confirmed-appointment HTTP/1.1
+Content-Type: application/json
+
+{
+  "bizUnitId": 1,
+  "bizCenterId": 100,
+  "tenantId": 1,
+  "patientId": {
+    "accountId": 5001,
+    "userProfileId": 6001,
+    "tenantId": 1,
+    "oidcUserId": "test-patient-1"
+  },
+  "doctorId": {
+    "accountId": 7001,
+    "userProfileId": 8001,
+    "tenantId": 1,
+    "oidcUserId": "test-doctor-1"
+  },
+  "prescreen": {
+    "symptom": "Test symptom",
+    "duration": 3,
+    "durationUnit": "days",
+    "attachments": [],
+    "allergies": []
+  },
+  "consultDuration": 20,
+  "bookingType": { "__type": "Instant" },
+  "consultationChannel": "video",
+  "paymentChannels": [
+    { "__type": "Card", "id": "124" }
+  ]
+}
+
+> {%
+  client.global.set("_confirmedBookingId", response.body);
+%}
+
+### Get session info — as DOCTOR (accountType 2)
+
+GET {{ HOST }}/v2/consultation/session-info/{{_confirmedBookingId}} HTTP/1.1
+Tdh-Sec-Iam-User-Identity: {"accountId":7001,"accountType":2,"userProfileId":8001,"userMainProfileId":8001,"tenantId":1,"oidcUserId":"test-doctor-1"}
+
+### Get session info — as PATIENT (accountType 1)
+
+GET {{ HOST }}/v2/consultation/session-info/{{_confirmedBookingId}} HTTP/1.1
+Tdh-Sec-Iam-User-Identity: {"accountId":5001,"accountType":1,"userProfileId":6001,"userMainProfileId":6001,"tenantId":1,"oidcUserId":"test-patient-1"}
+
+### Get session info — as PATIENT (accountType 1)
+
+GET {{ HOST }}/v2/consultation/session-info/{{_confirmedBookingId}} HTTP/1.1
+Tdh-Sec-Iam-User-Identity: {"accountId":626,"accountType":1,"userProfileId":626,"userMainProfileId":626,"tenantId":1,"oidcUserId":"test-patient-1"}

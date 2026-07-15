@@ -1,0 +1,9 @@
+@_bookingId=20260626101637387
+
+### Doctor session info
+GET {{ HOST }}/v2/consultation/session-info/{{_bookingId}} HTTP/1.1
+Tdh-Sec-Iam-User-Identity: {"accountId":562,"accountType":2,"userProfileId":562,"userMainProfileId":562,"tenantId":1,"oidcUserId":"test-patient-1"}
+
+### Doctor end session
+POST {{HOST }}/v2/consultation/end-session/{{_bookingId}} HTTP/1.1
+Tdh-Sec-Iam-User-Identity: {"accountId":562,"accountType":2,"userProfileId":562,"userMainProfileId":562,"tenantId":1,"oidcUserId":"test-patient-1"}

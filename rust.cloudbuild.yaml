@@ -1,0 +1,40 @@
+# Cloud Build configuration for Rust modules (mono-repo)
+# This is a shared configuration for all Rust services in the workspace.
+# Usage: gcloud builds submit --config=cloudbuild-rust.yaml --substitutions=_MODULE_NAME=consultation-rs,_TAG=latest .
+
+steps:
+  # Initialize Buildx builder
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'setup-builder'
+    args:
+      [
+        'buildx',
+        'create',
+        '--name',
+        'chef-builder',
+        '--driver',
+        'docker-container',
+        '--use',
+      ]
+
+  # Build Docker image using shared rust.Dockerfile, leveraging buildx cache and push to registry
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build'
+    args:
+      - 'buildx'
+      - 'build'
+      - '--build-arg'
+      - 'MODULE_NAME=${_MODULE_NAME}'
+      - '-f'
+      - 'rust.Dockerfile'
+      - '--cache-from=type=registry,ref=${_IMAGE}:cache'
+      - '--cache-to=type=registry,ref=${_IMAGE}:cache,mode=max'
+      - '-t'
+      - '${_IMAGE}:${_TAG}'
+      - '-t'
+      - '${_IMAGE}:latest'
+      - '--push'
+      - '.'
+
+options:
+  machineType: 'E2_HIGHCPU_8'

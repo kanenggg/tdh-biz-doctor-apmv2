@@ -1,0 +1,13 @@
+{
+  "__type": "AllParticipantJoined",
+  "doctorJoinedAt": 1703036388,
+  "sessionChannel": {
+    "__type": "Video",
+    "sessionId": "RM44542137cac4fa4db2ee0b5c9b7866ec",
+    "recordingUrl": "CiUAOAX+UVY3/+iTKxUhQ/AXnhNhkYgnBjPHSA8NP7ga6gUZQE35EngATmQy79kEkq9IHReytUDf2J8dOtAsl4MNdILIEBAsq29WC769LuBox877aw/fcvSxqKxVg4pNPx6z4ySy7QdsDNnXg8IyJBUpAo+A7yiCmkcjuTariGb1ZDJQ+uQDxYyWzMeTWRFm1lfyDH3A/qSS13Rp1xZ158k=",
+    "sessionChatId": "CH069157ccf64e414ea84f148754af537c",
+    "chatRecordingUrl": "CiUAOAX+UdQUUbFutxskI4jQAsg6GzxxKU7VCUOyKHsE59SIyvQgEoYBAE5kMu+JfoWujhcOU+ogRtC5ddNBXulVgkDC4nbL8/r0SY075zP1WXqmTcVQ843/M5kHXv0QVkHguEuC0Cl+UxiCUJYftvhrJj0CaHl6JLRRi1uNCMyfVjiR5gzvxWSlOjyq5Df6JRQeZppoDIoK+RGmVOeqFoXm9jVDcdCg/6wVxv8eWuE=",
+    "sessionChatServiceId": "ISf60c7f45aa3f4fa186a23deaf579b70d"
+  },
+  "patientJoinedAt": 1703036323
+}

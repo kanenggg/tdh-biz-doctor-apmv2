@@ -1,0 +1,711 @@
+asyncapi: 3.1.0
+info:
+  title: Biz APM Published Events
+  version: 1.0.0
+  description: >-
+    Runtime AsyncAPI contract for events published by tdh-biz-doctor-apmv2.
+    Consultation lifecycle payloads are published to the configured legacy V1
+    topic. Doctor operational availability changes are published to their
+    fixed topics. Messages are JSON encoded in Google Cloud Pub/Sub data; the
+    event_type and event_id values are Pub/Sub attributes. All timestamps whose
+    names end in At are Unix seconds unless their schema format is date-time.
+  contact:
+    name: Biz APM
+  license:
+    name: Proprietary
+  tags:
+    - name: consultation
+    - name: appointment-hold
+    - name: doctor-availability
+    - name: google-pubsub
+servers:
+  googlePubSub:
+    host: pubsub.googleapis.com
+    protocol: googlepubsub
+    protocolVersion: v1
+    description: >-
+      Google Cloud Pub/Sub. The deployment selects the project and the
+      consultation-event-v1 topic name through service configuration.
+defaultContentType: application/json
+channels:
+  consultationEventV1:
+    address: consultation-event-v1
+    description: >-
+      Configured legacy V1 consultation lifecycle topic. The application and
+      background outbox dispatcher publish the messages declared on this
+      channel.
+    messages:
+      publishConsultationEventV1.message.0:
+        $ref: '#/components/messages/TimeslotReserved'
+      publishConsultationEventV1.message.1:
+        $ref: '#/components/messages/ReservationCancelled'
+      publishConsultationEventV1.message.2:
+        $ref: '#/components/messages/ReservationExpired'
+      publishConsultationEventV1.message.3:
+        $ref: '#/components/messages/ConsultationBooked'
+      publishConsultationEventV1.message.4:
+        $ref: '#/components/messages/SessionCreated'
+      publishConsultationEventV1.message.5:
+        $ref: '#/components/messages/PatientJoined'
+      publishConsultationEventV1.message.6:
+        $ref: '#/components/messages/DoctorJoined'
+      publishConsultationEventV1.message.7:
+        $ref: '#/components/messages/AllParticipantJoined'
+      publishConsultationEventV1.message.8:
+        $ref: '#/components/messages/PatientDisconnected'
+      publishConsultationEventV1.message.9:
+        $ref: '#/components/messages/DoctorDisconnected'
+      publishConsultationEventV1.message.10:
+        $ref: '#/components/messages/SessionTerminated'
+      publishConsultationEventV1.message.11:
+        $ref: '#/components/messages/FollowUpRequired'
+  instantAvailabilityChanged:
+    address: apm.doctor-timeslot.instant-availability.changed
+    messages:
+      publishInstantAvailabilityChanged.message.0:
+        $ref: '#/components/messages/InstantAvailabilityChanged'
+  scheduleAvailabilityChanged:
+    address: apm.doctor-timeslot.schedule-availability.changed
+    messages:
+      publishScheduleAvailabilityChanged.message.0:
+        $ref: '#/components/messages/ScheduleAvailabilityChanged'
+  timeslotConfigurationChanged:
+    address: apm.doctor-timeslot.timeslot-configuration.changed
+    messages:
+      publishTimeslotConfigurationChanged.message.0:
+        $ref: '#/components/messages/TimeslotConfigurationChanged'
+operations:
+  publishConsultationEventV1:
+    action: send
+    channel:
+      $ref: '#/channels/consultationEventV1'
+    summary: Publish currently emitted consultation lifecycle events.
+    description: >-
+      This contract intentionally excludes V1 enum variants which the current
+      business paths do not construct or enqueue: ConsultationCancelled,
+      ConsultationSummarized, FollowUpRequestExpired,
+      PatientAcceptedFollowUp, and FollowUpCancelled.
+    messages:
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.0'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.1'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.2'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.3'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.4'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.5'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.6'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.7'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.8'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.9'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.10'
+      - $ref: '#/channels/consultationEventV1/messages/publishConsultationEventV1.message.11'
+  publishInstantAvailabilityChanged:
+    action: send
+    channel:
+      $ref: '#/channels/instantAvailabilityChanged'
+    summary: Publish a doctor's instant-availability change.
+    messages:
+      - $ref: '#/channels/instantAvailabilityChanged/messages/publishInstantAvailabilityChanged.message.0'
+  publishScheduleAvailabilityChanged:
+    action: send
+    channel:
+      $ref: '#/channels/scheduleAvailabilityChanged'
+    summary: Publish a doctor's schedule-availability change.
+    messages:
+      - $ref: '#/channels/scheduleAvailabilityChanged/messages/publishScheduleAvailabilityChanged.message.0'
+  publishTimeslotConfigurationChanged:
+    action: send
+    channel:
+      $ref: '#/channels/timeslotConfigurationChanged'
+    summary: Publish a doctor's timeslot-configuration change.
+    messages:
+      - $ref: '#/channels/timeslotConfigurationChanged/messages/publishTimeslotConfigurationChanged.message.0'
+components:
+  messages:
+    TimeslotReserved:
+      name: TimeslotReserved
+      title: Appointment Hold created (legacy TimeslotReserved)
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/TimeslotReservedEvent'
+    ReservationCancelled:
+      name: ReservationCancelled
+      title: Appointment Hold released (legacy ReservationCancelled)
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/ReservationCancelledEvent'
+    ReservationExpired:
+      name: ReservationExpired
+      title: Appointment Hold expired (legacy ReservationExpired)
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/ReservationExpiredEvent'
+    ConsultationBooked:
+      name: ConsultationBooked
+      title: Appointment booked after successful payment
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/ConsultationBookedEvent'
+    SessionCreated:
+      name: SessionCreated
+      title: Consultation session created
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/SessionCreatedEvent'
+    PatientJoined:
+      name: PatientJoined
+      title: Patient joined consultation session
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/PatientJoinedEvent'
+    DoctorJoined:
+      name: DoctorJoined
+      title: Doctor joined consultation session
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/DoctorJoinedEvent'
+    AllParticipantJoined:
+      name: AllParticipantJoined
+      title: All participants joined consultation session
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/AllParticipantJoinedEvent'
+    PatientDisconnected:
+      name: PatientDisconnected
+      title: Patient disconnected from consultation session
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/PatientDisconnectedEvent'
+    DoctorDisconnected:
+      name: DoctorDisconnected
+      title: Doctor disconnected from consultation session
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/DoctorDisconnectedEvent'
+    SessionTerminated:
+      name: SessionTerminated
+      title: Consultation session terminated
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/SessionTerminatedEvent'
+    FollowUpRequired:
+      name: FollowUpRequired
+      title: Doctor-created follow-up required
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/FollowUpRequiredEvent'
+    InstantAvailabilityChanged:
+      name: DoctorTimeslotConfigurationChanged
+      title: Doctor instant availability changed
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/InstantAvailabilityChangedEvent'
+    ScheduleAvailabilityChanged:
+      name: DoctorTimeslotConfigurationChanged
+      title: Doctor schedule availability changed
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/ScheduleAvailabilityChangedEvent'
+    TimeslotConfigurationChanged:
+      name: DoctorTimeslotConfigurationChanged
+      title: Doctor timeslot configuration changed
+      headers:
+        $ref: '#/components/schemas/PubSubAttributes'
+      payload:
+        $ref: '#/components/schemas/TimeslotConfigurationChangedEvent'
+  schemas:
+    PubSubAttributes:
+      type: object
+      required:
+        - event_type
+      properties:
+        event_type:
+          type: string
+          description: Event discriminator set by the publisher.
+        event_id:
+          type: string
+          format: uuid
+          description: Durable outbox event ID when publication uses the outbox dispatcher.
+    PartialUserIdentity:
+      type: object
+      required:
+        - accountId
+        - userProfileId
+        - tenantId
+      properties:
+        accountId:
+          type: integer
+          format: int64
+        userProfileId:
+          type: integer
+          format: int64
+        tenantId:
+          type: integer
+          format: int32
+        oidcUserId:
+          type: string
+    ConsultationChannel:
+      type: string
+      enum: [video, voice, chat]
+    UnixSeconds:
+      type: integer
+      format: int64
+      description: Seconds since the Unix epoch.
+    TimeslotReservedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorId
+        - bizUnitId
+        - reservedFrom
+        - reservationDurationSec
+        - consultationChannel
+        - reservedAt
+      properties:
+        __type:
+          type: string
+          const: TimeslotReserved
+        bookingId:
+          type: string
+          description: Public booking correlation identifier.
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        bizUnitId:
+          type: integer
+          format: int32
+        reservedFrom:
+          $ref: '#/components/schemas/UnixSeconds'
+        reservationDurationSec:
+          type: integer
+          format: int64
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        reservedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    ReservationCancelledEvent:
+      type: object
+      required: [__type, bookingId, patientIdentity, doctorId, bizUnitId, cancelledAt]
+      properties:
+        __type:
+          type: string
+          const: ReservationCancelled
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        bizUnitId:
+          type: integer
+          format: int32
+        cancelledAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    ReservationExpiredEvent:
+      type: object
+      required: [__type, bookingId, patientIdentity, doctorId, bizUnitId, cancelledAt]
+      properties:
+        __type:
+          type: string
+          const: ReservationExpired
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        bizUnitId:
+          type: integer
+          format: int32
+        cancelledAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    ConsultationBookedEvent:
+      type: object
+      required:
+        - __type
+        - eventId
+        - bookingId
+        - patientIdentity
+        - doctorId
+        - bizUnitId
+        - paymentModuleId
+        - bookingType
+        - consultationStartTime
+        - consultationDurationInSecond
+        - consultationChannel
+        - bookedAt
+        - symptoms
+        - consultationFee
+      properties:
+        __type:
+          type: string
+          const: ConsultationBooked
+        eventId:
+          type: string
+          format: uuid
+          description: Durable event ID embedded by the payment-confirmation outbox transaction.
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        bizUnitId:
+          type: integer
+          format: int32
+        paymentModuleId:
+          type: integer
+          format: int32
+        bookingType:
+          type: string
+          description: Persisted booking type value.
+        consultationStartTime:
+          $ref: '#/components/schemas/UnixSeconds'
+        consultationDurationInSecond:
+          type: integer
+          format: int32
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        bookedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+        symptoms:
+          type: string
+        consultationFee:
+          type: number
+    SessionCreatedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorId
+        - sessionProvider
+        - sessionInitiator
+        - consultationStartTime
+        - consultationDurationInSecond
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: SessionCreated
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        sessionProvider:
+          type: string
+          enum: [TWILIO, TOKBOX]
+        sessionInitiator:
+          $ref: '#/components/schemas/SessionParticipant'
+        consultationStartTime:
+          $ref: '#/components/schemas/UnixSeconds'
+        consultationDurationInSecond:
+          type: integer
+          format: int32
+        createdAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    PatientJoinedEvent:
+      type: object
+      required: [__type, bookingId, patientIdentity, doctorId, joinedAt]
+      properties:
+        __type:
+          type: string
+          const: PatientJoined
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        joinedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    DoctorJoinedEvent:
+      type: object
+      required: [__type, bookingId, patientIdentity, doctorId, joinedAt]
+      properties:
+        __type:
+          type: string
+          const: DoctorJoined
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        joinedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    AllParticipantJoinedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorId
+        - patientJoinedAt
+        - doctorJoinedAt
+      properties:
+        __type:
+          type: string
+          const: AllParticipantJoined
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        patientJoinedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+        doctorJoinedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    PatientDisconnectedEvent:
+      type: object
+      required: [__type, bookingId, patientIdentity, doctorId, disconnectedAt]
+      properties:
+        __type:
+          type: string
+          const: PatientDisconnected
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        disconnectedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    DoctorDisconnectedEvent:
+      type: object
+      required: [__type, bookingId, patientIdentity, doctorId, disconnectedAt]
+      properties:
+        __type:
+          type: string
+          const: DoctorDisconnected
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        disconnectedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    SessionParticipant:
+      type: object
+      required: [__type]
+      properties:
+        __type:
+          type: string
+          enum: [patient, doctor, system]
+    TerminationCode:
+      oneOf:
+        - type: object
+          required: [__type, patientJoinedAt, doctorJoinedAt]
+          properties:
+            __type: {type: string, const: SuccessfulSession}
+            patientJoinedAt: {$ref: '#/components/schemas/UnixSeconds'}
+            doctorJoinedAt: {$ref: '#/components/schemas/UnixSeconds'}
+        - type: object
+          required: [__type, doctorJoinedAt]
+          properties:
+            __type: {type: string, const: PatientAbsent}
+            doctorJoinedAt: {$ref: '#/components/schemas/UnixSeconds'}
+        - type: object
+          required: [__type, patientJoinedAt]
+          properties:
+            __type: {type: string, const: DoctorAbsent}
+            patientJoinedAt: {$ref: '#/components/schemas/UnixSeconds'}
+        - type: object
+          required: [__type]
+          properties:
+            __type: {type: string, const: BothPartiesAbsent}
+        - type: object
+          required: [__type, errorMessage]
+          properties:
+            __type: {type: string, const: TechnicalError}
+            errorMessage: {type: string}
+        - type: object
+          required: [__type]
+          properties:
+            __type: {type: string, const: PatientVerificationMismatch}
+    SessionTerminatedEvent:
+      type: object
+      required:
+        - __type
+        - bookingId
+        - patientIdentity
+        - doctorId
+        - terminationCode
+        - terminatedBy
+        - terminatedAt
+      properties:
+        __type:
+          type: string
+          const: SessionTerminated
+        bookingId:
+          type: string
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        terminationCode:
+          $ref: '#/components/schemas/TerminationCode'
+        terminatedBy:
+          $ref: '#/components/schemas/SessionParticipant'
+        terminatedAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    FollowUpRequiredEvent:
+      type: object
+      required:
+        - __type
+        - previousBookingId
+        - followUpId
+        - patientIdentity
+        - doctorId
+        - bizUnitId
+        - consultationStartTime
+        - consultationDurationInSecond
+        - consultationFee
+        - consultationChannel
+        - createdAt
+      properties:
+        __type:
+          type: string
+          const: FollowUpRequired
+        previousBookingId:
+          type: string
+          description: Booking ID of the completed consultation.
+        followUpId:
+          type: string
+          description: Booking ID of the new proposed follow-up.
+        patientIdentity:
+          $ref: '#/components/schemas/PartialUserIdentity'
+        doctorId:
+          type: integer
+          format: int32
+          description: Legacy Doctor User Identity ID for this V1 event.
+        bizUnitId:
+          type: integer
+          format: int32
+        consultationStartTime:
+          $ref: '#/components/schemas/UnixSeconds'
+        consultationDurationInSecond:
+          type: integer
+          format: int32
+        consultationFee:
+          type: number
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        additionalPatientNote:
+          type: string
+        internalNote:
+          type: string
+        createdAt:
+          $ref: '#/components/schemas/UnixSeconds'
+    DoctorTimeslotConfigurationChangedBase:
+      type: object
+      required: [eventId, eventType, doctor, changedAt, source, changeType]
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        eventType:
+          type: string
+          const: DoctorTimeslotConfigurationChanged
+        doctor:
+          type: object
+          required: [doctorId, doctorAccountId, doctorProfileId]
+          properties:
+            doctorId:
+              type: string
+              format: uuid
+              description: Canonical Doctor ID.
+            doctorAccountId:
+              type: integer
+              format: int64
+            doctorProfileId:
+              type: integer
+              format: int64
+            legacyDoctorId:
+              type: integer
+              format: int64
+        changedAt:
+          type: string
+          format: date-time
+        source:
+          type: object
+          required: [service, version]
+          properties:
+            service:
+              type: string
+              const: tdh-biz-doctor-apmv2/consultation-rs
+            version:
+              type: string
+              const: v1
+        changeType:
+          type: string
+          enum:
+            - InstantAvailability
+            - ScheduleAvailability
+            - TimeslotConfiguration
+            - ServiceConfiguration
+        isActive:
+          type: boolean
+    InstantAvailabilityChangedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DoctorTimeslotConfigurationChangedBase'
+        - type: object
+          required: [changeType, isActive]
+          properties:
+            changeType: {type: string, const: InstantAvailability}
+    ScheduleAvailabilityChangedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DoctorTimeslotConfigurationChangedBase'
+        - type: object
+          required: [changeType, isActive]
+          properties:
+            changeType: {type: string, const: ScheduleAvailability}
+    TimeslotConfigurationChangedEvent:
+      allOf:
+        - $ref: '#/components/schemas/DoctorTimeslotConfigurationChangedBase'
+        - type: object
+          required: [changeType]
+          properties:
+            changeType: {type: string, const: TimeslotConfiguration}

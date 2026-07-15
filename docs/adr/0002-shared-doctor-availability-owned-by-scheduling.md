@@ -1,0 +1,3 @@
+# Shared doctor availability is owned by Scheduling
+
+Doctor availability configuration is shared across pools and partner apps, so it should not be stored as pool-specific configuration. We decided that the Scheduling boundary owns shared doctor availability and booking-time conflict rules, while the Doctor App remains a doctor-facing API/BFF and Doctor Pool remains a visibility/distribution concern. The Doctor App should keep its external APIs stable and delegate persistence/ownership to Scheduling in `tdh-biz-doctor-apmv2`. This keeps the data that affects booking conflicts close to appointment/reservation truth, avoids frontend churn, and avoids making profile/onboarding storage the hidden scheduling source of truth.

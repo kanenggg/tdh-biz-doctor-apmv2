@@ -1,0 +1,12 @@
+{
+  "__type": "SessionEnded",
+  "doctorJoinedAt": 1770687044,
+  "sessionChannel": {
+    "__type": "Chat",
+    "sessionId": "CH12fc1206351c4f70945d6e7416a6628a",
+    "recordingUrl": "CiUAOAX+UcF+5XjkxjyNPUOuBH3c7DBWPK4XZrNoadehaEC8IuK/EoYBAGcj0XH4etwSTCk1bx3ZWuQXCwzFBXsrAZmlQL9jO6OtYZB8/VunMwhB4Nqpx89UJFgnX6FTTJzI5OOuyDMjoQMJPQ/c8Q7SM5r/HtuSo61+apED5oZsiTgF9X/3udiztoVkYsnNni7QN+UYdzCDGW3PZ4k8r5JeQPppqBB78IjYEmgcByw=",
+    "sessionServiceId": "ISf60c7f45aa3f4fa186a23deaf579b70d"
+  },
+  "sessionEndedAt": 1770687409,
+  "patientJoinedAt": 1770687042
+}

@@ -1,0 +1,232 @@
+asyncapi: 2.6.0
+info:
+  title: APM to Walrus Consultation Lifecycle Events
+  version: 0.1.0
+  description: >
+    Draft contract-first event surface for projecting APM reservation,
+    booking, and consultation occupancy into Walrus. APM remains the
+    source of truth for Slot Reservation, Confirmed Booking, and Doctor
+    Occupancy State. Walrus consumes these events only to hide or show
+    doctors for discovery and matching.
+defaultContentType: application/json
+channels:
+  consultation-event-v1:
+    publish:
+      operationId: publishConsultationLifecycleEvent
+      summary: Publish consultation lifecycle changes for downstream projections.
+      message:
+        oneOf:
+          - $ref: '#/components/messages/TimeslotReserved'
+          - $ref: '#/components/messages/ReservationExpired'
+          - $ref: '#/components/messages/ReservationCancelled'
+          - $ref: '#/components/messages/ConsultationBooked'
+          - $ref: '#/components/messages/ConsultationCancelled'
+          - $ref: '#/components/messages/SessionTerminated'
+components:
+  messages:
+    TimeslotReserved:
+      name: TimeslotReserved
+      title: Timeslot reserved
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/BaseLifecycleEvent'
+          - type: object
+            required:
+              - eventType
+              - bookingId
+              - doctor
+              - consultationChannel
+              - reservedAt
+              - reservedUntil
+              - occupiedFrom
+              - occupiedUntil
+            properties:
+              eventType:
+                type: string
+                const: TimeslotReserved
+              consultationChannel:
+                $ref: '#/components/schemas/ConsultationChannel'
+              bookingType:
+                type: string
+                description: Product booking type, for example instant or scheduled.
+              reservedAt:
+                type: string
+                format: date-time
+              reservedUntil:
+                type: string
+                format: date-time
+                description: Reservation TTL boundary.
+              occupiedFrom:
+                type: string
+                format: date-time
+                description: Start of the doctor occupancy window Walrus must hide.
+              occupiedUntil:
+                type: string
+                format: date-time
+                description: End of the doctor occupancy window Walrus must hide.
+              businessContext:
+                $ref: '#/components/schemas/BookingBusinessContext'
+    ReservationExpired:
+      name: ReservationExpired
+      title: Reservation expired
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/BaseLifecycleEvent'
+          - type: object
+            required: [eventType, bookingId, occurredAt]
+            properties:
+              eventType:
+                type: string
+                const: ReservationExpired
+    ReservationCancelled:
+      name: ReservationCancelled
+      title: Reservation cancelled
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/BaseLifecycleEvent'
+          - type: object
+            required: [eventType, bookingId, occurredAt]
+            properties:
+              eventType:
+                type: string
+                const: ReservationCancelled
+              reason:
+                type: string
+    ConsultationBooked:
+      name: ConsultationBooked
+      title: Consultation booked
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/BaseLifecycleEvent'
+          - type: object
+            required: [eventType, bookingId, occurredAt]
+            properties:
+              eventType:
+                type: string
+                const: ConsultationBooked
+              paymentReference:
+                type: string
+                description: Payment or entitlement reference already validated by APM/BFF.
+    ConsultationCancelled:
+      name: ConsultationCancelled
+      title: Consultation cancelled
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/BaseLifecycleEvent'
+          - type: object
+            required: [eventType, bookingId, occurredAt]
+            properties:
+              eventType:
+                type: string
+                const: ConsultationCancelled
+              reason:
+                type: string
+    SessionTerminated:
+      name: SessionTerminated
+      title: Session terminated
+      headers:
+        $ref: '#/components/schemas/PubSubHeaders'
+      payload:
+        allOf:
+          - $ref: '#/components/schemas/BaseLifecycleEvent'
+          - type: object
+            required: [eventType, bookingId, occurredAt, terminatedAt]
+            properties:
+              eventType:
+                type: string
+                const: SessionTerminated
+              terminatedAt:
+                type: string
+                format: date-time
+                description: Actual release point for projected instant availability.
+  schemas:
+    PubSubHeaders:
+      type: object
+      required: [messageId, publishTime]
+      properties:
+        messageId:
+          type: string
+          description: Transport message id. Walrus stores it for diagnostics, not business idempotency.
+        publishTime:
+          type: string
+          format: date-time
+        event_type:
+          type: string
+          description: Optional transport event type attribute.
+        bizUnitId:
+          type: string
+          description: Optional legacy business attribute. Pool id remains Walrus canonical identity.
+    BaseLifecycleEvent:
+      type: object
+      required: [eventType, bookingId, occurredAt]
+      properties:
+        eventId:
+          type: string
+          nullable: true
+          description: Optional event id. Consumers must remain idempotent by bookingId and lifecycle state.
+        eventType:
+          type: string
+        bookingId:
+          type: string
+          description: Projection idempotency key for Walrus APM consultation projection.
+        occurredAt:
+          type: string
+          format: date-time
+        doctor:
+          $ref: '#/components/schemas/DoctorIdentity'
+        source:
+          type: object
+          properties:
+            service:
+              type: string
+              example: tdh-biz-doctor-apmv2
+            version:
+              type: string
+    DoctorIdentity:
+      type: object
+      description: >
+        Mixed doctor identifiers are allowed at the boundary. Walrus maps aliases
+        to its canonical profile UUID doctorId when available.
+      properties:
+        doctorId:
+          type: string
+          format: uuid
+          nullable: true
+        legacyDoctorId:
+          type: integer
+          format: int64
+          nullable: true
+        doctorProfileId:
+          type: integer
+          format: int64
+          nullable: true
+        doctorAccountId:
+          type: integer
+          format: int64
+          nullable: true
+    ConsultationChannel:
+      type: string
+      enum: [video, voice, chat]
+    BookingBusinessContext:
+      type: object
+      description: Server-attached origin metadata. Clients do not need to know pool or raw biz metadata.
+      properties:
+        poolId:
+          type: string
+          nullable: true
+        bizUnitId:
+          type: string
+          nullable: true
+        bizCenterId:
+          type: string
+          nullable: true

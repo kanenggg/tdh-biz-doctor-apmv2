@@ -1,0 +1,42 @@
+{
+  "__type": "DoctorProfileApproved",
+  "eventId": "evt-1",
+  "doctorId": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "doctorAccountId": 2443,
+  "doctorProfileId": 8891,
+  "departmentId": 17,
+  "department": { "th": "อายุรกรรม", "en": "Internal Medicine" },
+  "counselingAreas": [{ "th": "หัวใจ", "en": "Heart" }],
+  "isActive": true,
+  "profession": {
+    "id": 1,
+    "name": { "th": "แพทย์", "en": "Doctor" },
+    "abbr": { "th": "พญ.", "en": "Dr." }
+  },
+  "specialty": {
+    "id": 10,
+    "name": { "th": "หัวใจ", "en": "Cardiology" },
+    "subspecialty": {
+      "id": 11,
+      "name": { "th": "หัวใจ", "en": "Cardiology" },
+      "medicalSchool": { "id": 12, "name": { "th": "มหาวิทยาลัยแพทย์", "en": "Medical University" } }
+    },
+    "medicalSchool": { "id": 12, "name": { "th": "มหาวิทยาลัยแพทย์", "en": "Medical University" } }
+  },
+  "workPlace": [{ "id": 20, "name": { "th": "โรงพยาบาล", "en": "Hospital" } }],
+  "academicPosition": {
+    "id": 2,
+    "name": { "th": "อาจารย์", "en": "Lecturer" },
+    "abbr": { "th": "อ.", "en": "Lect." }
+  },
+  "firstName": { "th": "สมชาย", "en": "Somchai" },
+  "lastName": { "th": "ใจดี", "en": "Jaidee" },
+  "profileImageUrl": "https://x/doctor.jpg",
+  "doctorFee": 650,
+  "doctorFeeCurrency": "THB",
+  "languages": ["th", "en"],
+  "durationMinutes": 15,
+  "channels": ["voice", "chat"],
+  "approvedAt": 1718668800,
+  "occurredAt": 1718668800
+}

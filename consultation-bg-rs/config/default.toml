@@ -1,0 +1,48 @@
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[database]
+user = ""
+password = ""
+host = ""
+port = 5432
+database_name = ""
+
+[payment]
+public_key = ""
+
+[payment_confirm]
+# Opt in only after migration 0003 is applied with APMV2_HOLD_CUTOVER_READY=true.
+enabled = false
+
+[google_cloud]
+project_id = ""
+pubsub_emulator_host = ""
+
+[consultation_event]
+pubsub_topic = "consultation-event-v1"
+
+[event_outbox]
+enabled = true
+poll_interval_seconds = 5
+batch_size = 50
+lock_seconds = 60
+
+[appointment_hold_expiry]
+# Enable only after the appointment_hold/doctor_occupancy cutover migration.
+enabled = false
+poll_interval_seconds = 30
+batch_size = 50
+
+[doctor_projection_sync]
+# Empty allowlist disables preferred /internal/v1/doctor-projection/sync and legacy /internal/doctor-projection/sync.
+allowed_service_account_emails = []
+tokeninfo_url = "https://oauth2.googleapis.com/tokeninfo"
+
+[doctor_projection]
+# V1 events remain accepted. V2 snapshots are accepted only for these schemas.
+allowed_schema_versions = [2]
+# Pub/Sub must use a dead-letter topic and bounded delivery attempts. Invalid
+# payloads deliberately return retryable 5xx so the subscription policy, rather
+# than this service, owns retry and DLQ routing.

@@ -1,0 +1,30 @@
+# Consultation-RS Default Configuration
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[database]
+user = "postgres_user"
+password = "your_password"
+host = "localhost"
+port = 5432
+database_name = "consultation"
+
+[session]
+lead_time_seconds = 300
+consultation_duration_minutes = 30
+required_appointment_status = "CONFIRMED"
+skip_chat_biz_unit_id = 2
+
+[twilio]
+base_url = "http://localhost"
+video_base_url = "https://video.twilio.com"
+chat_base_url = "https://conversations.twilio.com"
+account_sid = "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+api_key_sid = "SKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+api_key_secret = "your_api_key_secret"
+auth_token = "your_auth_token"
+
+[video]
+provider_type = "twilio"

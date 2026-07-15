@@ -1,0 +1,48 @@
+direction: up
+
+apm: @services/apm
+med: @services/medicine
+
+patient: Patient {
+  shape: person
+}
+
+doctor: Doctor {
+  shape: person
+}
+
+msg: {
+  msg_payment_success: {
+    label: Payment Success
+    shape: queue
+  }
+}
+
+consult_event: {
+  msg_consultation_booked: Consult Booked {
+    shape: queue
+  }
+
+  msg_consultation_summarized: Consult Summarized {
+    shape: queue
+  }
+}
+
+bff_msg.msg_doctor_submit_note: Doctor Submit Note {
+  shape: queue
+}
+
+doctor -> bff.api: Get Past visit / Appointment deta
+patient -> apm.consultation_service.api: Book
+
+msg.msg_payment_success -> bff.bg
+consult_event.msg_consultation_booked -> bff.bg
+
+apm.consultation_service.api -> consult_event.msg_consultation_booked: Produce
+
+apm.consultation_service.bg -> consult_event.msg_consultation_summarized: Produce
+
+bff.api -> bff_msg.msg_doctor_submit_note: Doctor submit summary note
+
+bff_msg.msg_doctor_submit_note -> med.med_service.bg: consume
+bff_msg.msg_doctor_submit_note -> apm.consultation_service.bg: consume

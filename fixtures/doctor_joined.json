@@ -1,0 +1,12 @@
+{
+  "__type": "DoctorJoined",
+  "doctorJoinedAt": 1708063886,
+  "sessionChannel": {
+    "__type": "Video",
+    "sessionId": "RMa173643b9256715ea61b546280949bd0",
+    "recordingUrl": "CiUAOAX+UaeO5NwKeFxCpaoocA/FF+IreZeLLFNohr1E/5w0C0ADEngATmQy70amWZybU4KLdvaWwQ3rbng1nRZIDHlaZ4Vp/4nXcqtxaJudlCyj+MKPwx/zeU9A3PQ/XRQT9mniE895kXWHoImkVEzGTaircJzSTIGvDcESW+p15yJRfQmUAhSsIAM2MTH33HbOflhBmTIznzuv+z9LlnI=",
+    "sessionChatId": "CH7ef32bcdc9db4b42b84585b7b114e8dc",
+    "chatRecordingUrl": "CiUAOAX+UQ3QhHLaY5RFkS7EDnOoHNGxc+mSdpFI0pHzamYiLja/EoYBAE5kMu+v/yxbD0ho2ZV4g6Ft6mz3sydbj/JuauWUM1ouI1aJmSQH4mdeG2dJJFgE19JzO7I2SqTYTbnS4vfXqmQ2cl8LhY0azeQSOnlC9+JbJXZ3ycVzv4Jta2XHuKek0jOYi1lNaFHrzQd+Wvq0k5oH8vF8iT5Lsu/j8GShsroNjRbWJ1E=",
+    "sessionChatServiceId": "ISf60c7f45aa3f4fa186a23deaf579b70d"
+  }
+}

@@ -1,0 +1,4 @@
+[sqruff]
+dialect = postgres
+templater = raw
+

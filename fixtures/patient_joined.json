@@ -1,0 +1,12 @@
+{
+  "__type": "PatientJoined",
+  "sessionChannel": {
+    "__type": "Video",
+    "sessionId": "RMb5ae260fdaa7d0a7bdfa3e6bec551085",
+    "recordingUrl": "CiUAOAX+UTGxR6OiXWBxRM6HtU44OjPtTTR8LTbJ28kDYgOSVKYmEngAwmqbFUAK4lbsUNP+6sduw9ri82L8Ts540yIInUK6somjqLblq0sjJaX0/JeRm8Y3T4L+jp47gV3M7uKBR4VMdCLyvhpSNvaDIGWp6eMm9aP/wYm2BqFh9yV6efYezhna+bGM7/KJ4rn9YlzrEoma76KMu6m8w3Q=",
+    "sessionChatId": "CH1d719a9c51774582b9b15406cd68d2c4",
+    "chatRecordingUrl": "CiUAOAX+UehYm5suLd5hauK1IVmhUN0EtPKKBtaAf0e/eX1mVCLPEoYBAMJqmxU/9+jCpJgLpoo/1TDgNB/tz2cTeT4KnngIyEBeikvux7pwbEDGdjn7I/6dBip1yOM9r+KwZNHnyNQ2LY75+ganZmRi4AAKSKfFJs3WXnJEfToGydGTmqrReRbCBEvELxaCfZ8z+OJzG0lXTa4VUAIVKlhqEOOjI28p3e7W/8DnHxU=",
+    "sessionChatServiceId": "ISf60c7f45aa3f4fa186a23deaf579b70d"
+  },
+  "patientJoinedAt": 1730796029
+}

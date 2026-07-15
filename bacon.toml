@@ -1,0 +1,87 @@
+# bacon.toml - bacon configuration file
+# For documentation: https://dystroy.org/bacon/config/
+
+[jobs.check]
+command = ["cargo", "check", "--color", "always"]
+need_stdout = false
+
+[jobs.check-all]
+command = ["cargo", "check", "--all-targets", "--color", "always"]
+need_stdout = false
+
+[jobs.clippy]
+command = ["cargo", "clippy", "--all-targets", "--color", "always"]
+need_stdout = false
+
+[jobs.clippy-all]
+command = [
+  "cargo",
+  "clippy",
+  "--all-targets",
+  "--all-features",
+  "--color",
+  "always",
+]
+need_stdout = false
+
+[jobs.test]
+command = ["cargo", "test", "--color", "always"]
+need_stdout = true
+
+[jobs.integration-test]
+command = [
+  "cargo",
+  "test",
+  "-p",
+  "consultation-rs",
+  "--tests",
+  "--color",
+  "always",
+  "--",
+  "--ignored",
+  "--nocapture",
+]
+need_stdout = true
+
+[jobs.doc]
+command = ["cargo", "doc", "--color", "always", "--no-deps"]
+need_stdout = false
+
+[jobs.doc-open]
+command = ["cargo", "doc", "--color", "always", "--no-deps", "--open"]
+need_stdout = false
+
+[jobs.run-consultation-rs]
+command = [
+  "cargo",
+  "run",
+  "--bin",
+  "consultation-rs",
+  "--color",
+  "always",
+  "--",
+  "--config-path",
+  "./consultation-rs/config/default.toml",
+  "--config-path",
+  "./consultation-rs/config/local.toml",
+]
+need_stdout = true
+allow_warnings = true
+background = true
+watch = ["consultation-rs/src", "consultation-rs/config"]
+# kill_grace_period = 3
+on_success = "back"
+scroll_anchor = "auto"
+
+
+[keybindings]
+c = "job:check"
+i = "job:integration-test"
+r = "job:run-consultation-rs"
+# Vim like key
+g = "scroll-to-top"
+shift-g = "scroll-to-bottom"
+k = "scroll-lines(-1)"
+j = "scroll-lines(1)"
+ctrl-u = "scroll-page(-1)"
+ctrl-d = "scroll-page(1)"

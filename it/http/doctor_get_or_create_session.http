@@ -1,0 +1,7 @@
+### 
+
+< ./src/set-iam-header.js
+
+GET {{ HOST }}/v2/consultation/session-info/{{bookingId}} HTTP/1.1
+Tdh-Sec-Iam-User-Identity: {"accountId":321,"accountType":2,"userProfileId":,"userMainProfileId":321,"tenantId":1,"oidcUserId":"test-user"}
+# Tdh-Sec-Iam-User-Identity: {{ SEC_IAM_HEADER }}

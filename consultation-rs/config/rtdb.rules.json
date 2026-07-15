@@ -1,0 +1,12 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "consultations": {
+      "$bookingId": {
+        ".read": "auth != null && auth.token.role === 'patient' && auth.token.bookingId === $bookingId && auth.token.rtdbPath === 'consultations/' + $bookingId && auth.token.tenantId === data.child('patientTenantId').val() && auth.token.accountId === data.child('patientAccountId').val() && auth.token.profileId === data.child('patientProfileId').val()",
+        ".write": false
+      }
+    }
+  }
+}

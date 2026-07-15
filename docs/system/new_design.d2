@@ -1,0 +1,95 @@
+...@flows/booking
+
+classes: {
+  load: {
+    label: load\nbalancer
+    width: 100
+    height: 200
+    style: {
+      stroke-width: 0
+      fill: "#44C7B1"
+      shadow: true
+      border-radius: 5
+    }
+  }
+  service: {
+    style: {
+      fill: "#44C7B1"
+      shadow: true
+      stroke-width: 0
+      border-radius: 5
+    }
+  }
+}
+
+direction: right
+
+doctor_service: {
+  db: {
+    shape: cylinder
+    doctor_profile
+    doctor_schedules
+    doctor_instant_status
+    doctor_schedule_status
+    doctor_channel
+    doctor_fee
+  }
+}
+
+cdc_doctor: {
+  shape: queue
+}
+
+doctor_apm: {
+  consume_doctor_schedules
+  consume_doctor_instant_status
+  consume_doctor_schedule_status
+
+  consume_doctor_* -> doctor_pool.cache
+
+  doctor_pool: {
+    pool_identity: {
+      shape: sql_table
+      poolId: int
+      doctors: '[]Doctor'
+    }
+
+    cache: doctor_profile {
+      shape: sql_table
+      'doctor:{id}:instant:status': 'ACTIVE | BUSY | IN_ACTIVE'
+      'doctor:{id}:schedule:status': 'ACTIVE | IN_ACTIVE'
+      'doctor:{id}:schedule:availability': ScheduleAvailability
+      'doctor:{id}:fee': Decimal(10,2)
+      'doctor:{id}:channels': 'Video | Chat | Text'
+      'doctor:{id}:profile': DoctorProfile
+      'doctor:{id}:rating': int
+      'doctor:{id}:score': int
+    }
+  }
+
+  doctor_timeslot_services: {
+    get_doctor_timeslot: {
+      class: service
+    }
+    get_doctor_booked_timeslot: {
+      class: service
+    }
+    book_doctor: {
+      class: service
+    }
+    cancel_book: {
+      class: service
+    }
+  }
+  consultation
+
+  db: {
+    shape: cylinder
+    ...@db/biz_apm
+  }
+  doctor_timeslot_services.get_doctor_timeslot -> db
+  doctor_timeslot_services.book_doctor -> db.reserved_slot: Write
+}
+
+doctor_service.db.* -> cdc_doctor -> doctor_apm.consume_doctor*
+doctor_apm.doctor_timeslot_services.book_doctor -> doctor_apm.doctor_pool.cache

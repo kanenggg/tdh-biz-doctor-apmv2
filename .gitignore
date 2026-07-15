@@ -1,0 +1,3 @@
+# Developer-local CLI credentials
+/cli/config.toml
+/cli/config.local.yaml

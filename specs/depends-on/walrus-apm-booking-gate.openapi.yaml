@@ -1,0 +1,298 @@
+openapi: 3.0.3
+info:
+  title: APM Booking Gate and Repair API for Walrus
+  version: 0.1.0
+  description: >
+    Draft contract-first HTTP surface for APM as final appointment gate.
+    APM owns exact scheduled timeslots, Slot Reservation, booking confirmation,
+    appointment lifecycle, and Doctor Occupancy State. Walrus discovery output
+    is never booking truth.
+servers:
+  - url: /
+paths:
+  /apm/v1/doctors/{doctorId}/available-timeslots:
+    get:
+      summary: Get exact scheduled timeslots for one doctor.
+      description: Used after Walrus returns scheduled-enabled doctors. APM is the timeslot source of truth.
+      parameters:
+        - $ref: '#/components/parameters/DoctorId'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+        - $ref: '#/components/parameters/ConsultationChannel'
+      responses:
+        '200':
+          description: Exact available timeslots from APM.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailableTimeslotResponse'
+  /apm/v1/slot-reservations:
+    post:
+      summary: Atomically reserve a doctor occupancy window.
+      description: Lock-first MVP entry point. Payment follows the reservation.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSlotReservationRequest'
+      responses:
+        '201':
+          description: Doctor capacity was reserved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SlotReservationCreated'
+        '409':
+          description: Doctor is no longer bookable for the requested window.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRejected'
+  /apm/v1/slot-reservations/{bookingId}/confirm:
+    post:
+      summary: Confirm a reserved slot after payment or entitlement validation.
+      description: APM does not calculate price; it trusts payment confirmation or verified paidToken context.
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmReservationRequest'
+      responses:
+        '200':
+          description: Reservation was confirmed as a booked consultation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingConfirmed'
+        '409':
+          description: Reservation cannot be confirmed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingRejected'
+  /apm/v1/slot-reservations/{bookingId}:
+    delete:
+      summary: Cancel or release a reservation.
+      parameters:
+        - $ref: '#/components/parameters/BookingId'
+      responses:
+        '204':
+          description: Reservation released or already terminal.
+  /apm/internal/v1/doctor-occupancy-windows:
+    get:
+      summary: Repair/bootstrap doctor occupancy projection.
+      description: >
+        Internal bounded repair API for Walrus when lifecycle events are stale,
+        missing, or incomplete. The returned occupancy windows are authoritative
+        for projection repair, but APM booking APIs still perform final conflict checks.
+      parameters:
+        - name: doctorId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: legacyDoctorId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: doctorProfileId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Active or recent occupancy windows for repair.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OccupancyWindowResponse'
+components:
+  parameters:
+    DoctorId:
+      name: doctorId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+    From:
+      name: from
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+    To:
+      name: to
+      in: query
+      required: true
+      schema:
+        type: string
+        format: date-time
+    ConsultationChannel:
+      name: consultationChannel
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/ConsultationChannel'
+  schemas:
+    ConsultationChannel:
+      type: string
+      enum: [video, voice, chat]
+    CreateSlotReservationRequest:
+      type: object
+      required: [doctorId, consultationChannel, requestedStart]
+      properties:
+        requestId:
+          type: string
+          description: Caller idempotency key.
+        doctorId:
+          type: string
+          format: uuid
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+        requestedStart:
+          type: string
+          format: date-time
+        durationSeconds:
+          type: integer
+          minimum: 1
+        bookingBusinessContext:
+          $ref: '#/components/schemas/BookingBusinessContext'
+        intakeRef:
+          type: string
+          nullable: true
+    SlotReservationCreated:
+      type: object
+      required: [bookingId, reservationState, reservedUntil, occupiedFrom, occupiedUntil]
+      properties:
+        bookingId:
+          type: string
+        reservationState:
+          type: string
+          enum: [reserved]
+        reservedUntil:
+          type: string
+          format: date-time
+        occupiedFrom:
+          type: string
+          format: date-time
+        occupiedUntil:
+          type: string
+          format: date-time
+    ConfirmReservationRequest:
+      type: object
+      required: [paymentConfirmationRef]
+      properties:
+        paymentConfirmationRef:
+          type: string
+        paidToken:
+          type: string
+          nullable: true
+          description: Verified by server side before confirmation when used.
+    BookingConfirmed:
+      type: object
+      required: [bookingId, bookingState]
+      properties:
+        bookingId:
+          type: string
+        bookingState:
+          type: string
+          enum: [booked]
+    BookingRejected:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum: [doctor_unavailable, reservation_expired, invalid_payment_state, invalid_request]
+        message:
+          type: string
+    AvailableTimeslotResponse:
+      type: object
+      required: [doctorId, timeslots]
+      properties:
+        doctorId:
+          type: string
+          format: uuid
+        timeslots:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableTimeslot'
+    AvailableTimeslot:
+      type: object
+      required: [start, end, consultationChannel]
+      properties:
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        consultationChannel:
+          $ref: '#/components/schemas/ConsultationChannel'
+    OccupancyWindowResponse:
+      type: object
+      required: [windows]
+      properties:
+        windows:
+          type: array
+          items:
+            $ref: '#/components/schemas/DoctorOccupancyWindow'
+    DoctorOccupancyWindow:
+      type: object
+      required: [bookingId, state, occupiedFrom, occupiedUntil]
+      properties:
+        bookingId:
+          type: string
+        doctorId:
+          type: string
+          format: uuid
+          nullable: true
+        legacyDoctorId:
+          type: integer
+          format: int64
+          nullable: true
+        doctorProfileId:
+          type: integer
+          format: int64
+          nullable: true
+        state:
+          type: string
+          enum: [reserved, booked, done, cancelled, expired]
+        occupiedFrom:
+          type: string
+          format: date-time
+        occupiedUntil:
+          type: string
+          format: date-time
+    BookingBusinessContext:
+      type: object
+      description: Server-derived origin metadata. This is not patient-selected pool or raw biz metadata.
+      properties:
+        poolId:
+          type: string
+          nullable: true
+        bizUnitId:
+          type: string
+          nullable: true
+        bizCenterId:
+          type: string
+          nullable: true

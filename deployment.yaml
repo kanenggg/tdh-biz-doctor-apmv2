@@ -1,0 +1,30 @@
+templateVersion: v2
+releaseVersion: v0.3.6
+services:
+  timeslot:
+    version: v0.3.6
+    deployAfterRelease: false
+  timeslot-manager:
+    version: v0.2.5
+    deployAfterRelease: false
+  consultation:
+    version: v0.3.4
+    deployAfterRelease: false
+  consultation-bg-service:
+    version: v0.2.5
+    deployAfterRelease: false
+  screenshot-accumulator:
+    version: v0.2.5
+    deployAfterRelease: false
+  screenshot-scheduler:
+    version: v0.2.5
+    deployAfterRelease: false
+  screenshot-composer:
+    version: v0.2.5
+    deployAfterRelease: false
+  common-db:
+    version: v0.0.27
+    deployAfterRelease: false
+  nhso-evidence:
+    version: v0.3.0
+    deployAfterRelease: false

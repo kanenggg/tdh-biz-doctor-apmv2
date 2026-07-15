@@ -1,0 +1,3482 @@
+{
+  "components": {
+    "schemas": {
+      "AddConsultationScreenshot": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "AddConsultationScreenshot.UploadSuccess"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "AddConsultationScreenshot.ScreenshotAlreadyUploaded"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "AddConsultationScreenshot.ConsultationNotFound"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "AddConsultationScreenshot.Unauthorized"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "AppointmentDetail": {
+        "properties": {
+          "appointmentTime": {
+            "$ref": "#/components/schemas/AppointmentTime"
+          },
+          "bookingId": {
+            "type": "string"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingTypeEnum"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannelEnum"
+          },
+          "doctor": {
+            "$ref": "#/components/schemas/PartialUserIdentity"
+          },
+          "patient": {
+            "$ref": "#/components/schemas/PartialUserIdentity"
+          },
+          "paymentTxId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "paymentTxRefId": {
+            "type": "string"
+          },
+          "prescreen": {
+            "$ref": "#/components/schemas/PrescreenInfo"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AppointmentStatusEnum"
+          }
+        },
+        "required": [
+          "bookingId",
+          "appointmentTime",
+          "status",
+          "bookingType",
+          "consultationChannel",
+          "patient",
+          "doctor",
+          "prescreen",
+          "paymentTxId",
+          "paymentTxRefId"
+        ],
+        "type": "object"
+      },
+      "AppointmentDoctor": {
+        "description": "Doctor on a listed appointment: identity (account/profile) plus a name snapshot.\n\nTODO: the first/last name snapshot is NOT yet persisted on the appointment\nrecord. Until the write path snapshots it, the service mocks the name (see\n`service::mock_doctor`). The IDs are real; the names are placeholders.",
+        "properties": {
+          "accountId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "profileId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountId",
+          "profileId",
+          "firstName",
+          "lastName"
+        ],
+        "type": "object"
+      },
+      "AppointmentList": {
+        "properties": {
+          "appointments": {
+            "items": {
+              "$ref": "#/components/schemas/AppointmentListItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "appointments"
+        ],
+        "type": "object"
+      },
+      "AppointmentListItem": {
+        "description": "One fulfilled appointment in the list — the appointment envelope only.",
+        "properties": {
+          "appointmentTime": {
+            "$ref": "#/components/schemas/AppointmentTime"
+          },
+          "bookingId": {
+            "type": "string"
+          },
+          "doctor": {
+            "$ref": "#/components/schemas/AppointmentDoctor"
+          }
+        },
+        "required": [
+          "bookingId",
+          "appointmentTime",
+          "doctor"
+        ],
+        "type": "object"
+      },
+      "AppointmentStatus": {
+        "enum": [
+          "PROPOSED",
+          "PENDING",
+          "BOOKED",
+          "ARRIVED",
+          "FULFILLED",
+          "CANCELLED",
+          "NOSHOW",
+          "ENTERED_IN_ERROR"
+        ],
+        "type": "string"
+      },
+      "AppointmentStatusEnum": {
+        "enum": [
+          "Proposed",
+          "Pending",
+          "Booked",
+          "Arrived",
+          "Fulfilled",
+          "CONSULTATION_DONE",
+          "Cancelled",
+          "Noshow",
+          "EnteredInError"
+        ],
+        "type": "string"
+      },
+      "AppointmentTime": {
+        "properties": {
+          "endTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime"
+        ],
+        "type": "object"
+      },
+      "AvailabilityResponse": {
+        "properties": {
+          "__type": {
+            "type": "string"
+          },
+          "instantAvailable": {
+            "type": "boolean"
+          },
+          "scheduleAvailable": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "__type",
+          "scheduleAvailable",
+          "instantAvailable"
+        ],
+        "type": "object"
+      },
+      "AvailableDoctor": {
+        "properties": {
+          "availableTimeslotCount": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "doctorAccountId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "doctorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "doctorProfileId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "nextAvailableTimeslotId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "doctorId",
+          "doctorAccountId",
+          "doctorProfileId",
+          "availableTimeslotCount"
+        ],
+        "type": "object"
+      },
+      "AvailableDoctorsResponse": {
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "doctors": {
+            "items": {
+              "$ref": "#/components/schemas/AvailableDoctor"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "timezone",
+          "doctors"
+        ],
+        "type": "object"
+      },
+      "AvailableTimeslot": {
+        "properties": {
+          "end": {
+            "type": "string"
+          },
+          "endEpoch": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "type": "string"
+          },
+          "startEpoch": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeslotId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "timeslotId",
+          "start",
+          "end",
+          "startEpoch",
+          "endEpoch"
+        ],
+        "type": "object"
+      },
+      "AvailableTimeslotResponse": {
+        "properties": {
+          "doctorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "timeslots": {
+            "items": {
+              "$ref": "#/components/schemas/AvailableTimeslot"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "doctorId",
+          "timeslots"
+        ],
+        "type": "object"
+      },
+      "BookingCancelResponse": {
+        "properties": {
+          "bookingId": {
+            "type": "string"
+          },
+          "cancelledAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "cancelledLifecycle": {
+            "$ref": "#/components/schemas/BookingLifecycle"
+          },
+          "state": {
+            "$ref": "#/components/schemas/BookingLifecycle"
+          }
+        },
+        "required": [
+          "bookingId",
+          "state",
+          "cancelledLifecycle",
+          "cancelledAt"
+        ],
+        "type": "object"
+      },
+      "BookingLifecycle": {
+        "enum": [
+          "Reserved",
+          "ReserveExpired",
+          "Booked",
+          "ConsultationDone",
+          "Cancelled",
+          "Reservation",
+          "Appointment",
+          "Unknown"
+        ],
+        "type": "string"
+      },
+      "BookingResponse": {
+        "properties": {
+          "bookingId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "paymentQuote": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PaymentQuote"
+              }
+            ]
+          },
+          "reserveToken": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/BookingResponseStatus"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "BookingResponseStatus": {
+        "enum": [
+          "Reserved",
+          "DoctorNotAvailable",
+          "SlotAlreadyBooked"
+        ],
+        "type": "string"
+      },
+      "BookingStateResponse": {
+        "properties": {
+          "appointmentEnd": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appointmentStart": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appointmentStatus": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bookingId": {
+            "type": "string"
+          },
+          "reservationStatus": {
+            "type": "string"
+          },
+          "reservedUntil": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "state": {
+            "$ref": "#/components/schemas/BookingLifecycle"
+          }
+        },
+        "required": [
+          "bookingId",
+          "state",
+          "reservationStatus",
+          "reservedUntil",
+          "appointmentStart",
+          "appointmentEnd"
+        ],
+        "type": "object"
+      },
+      "BookingType": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "Instant"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "Schedule"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "BookingTypeEnum": {
+        "enum": [
+          "Instant",
+          "Schedule",
+          "FollowUp"
+        ],
+        "type": "string"
+      },
+      "ConsultationChannel": {
+        "description": "Consultation channel with JSON compatibility\nAccepts \"video\", \"VIDEO\", \"Video\" etc. (case-insensitive) to handle Java service output.",
+        "enum": [
+          "video",
+          "chat",
+          "voice"
+        ],
+        "type": "string"
+      },
+      "ConsultationChannelEnum": {
+        "enum": [
+          "video",
+          "voice",
+          "chat"
+        ],
+        "type": "string"
+      },
+      "ConsultationPreScreen": {
+        "properties": {
+          "allergies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "attachments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "duration": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "durationUnit": {
+            "type": "string"
+          },
+          "symptom": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "symptom",
+          "duration",
+          "durationUnit",
+          "attachments",
+          "allergies"
+        ],
+        "type": "object"
+      },
+      "ConsultationSummary": {
+        "description": "Canonical consultation-summary detail for a fulfilled appointment.",
+        "properties": {
+          "appointmentTime": {
+            "$ref": "#/components/schemas/AppointmentTime"
+          },
+          "bookingId": {
+            "type": "string"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannelEnum"
+          },
+          "doctor": {
+            "$ref": "#/components/schemas/DoctorRef"
+          },
+          "followUp": {
+            "$ref": "#/components/schemas/FollowUp"
+          },
+          "summaryNote": {
+            "$ref": "#/components/schemas/ConsultationSummaryNote"
+          }
+        },
+        "required": [
+          "bookingId",
+          "appointmentTime",
+          "consultationChannel",
+          "doctor",
+          "summaryNote",
+          "followUp"
+        ],
+        "type": "object"
+      },
+      "ConsultationSummaryNote": {
+        "description": "The clinical content of a fulfilled appointment, decrypted from `doctor_summary_note`.",
+        "properties": {
+          "chiefComplaint": {
+            "type": "string"
+          },
+          "diagnosis": {
+            "type": "string"
+          },
+          "drugAllergies": {
+            "items": {
+              "$ref": "#/components/schemas/DrugAllergy"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "icd10": {
+            "items": {
+              "$ref": "#/components/schemas/Icd10"
+            },
+            "type": "array"
+          },
+          "illnessDuration": {
+            "$ref": "#/components/schemas/DurationUnit"
+          },
+          "noteToStaff": {
+            "type": "string"
+          },
+          "prescriptionId": {
+            "description": "Reference only; prescription items are out of scope for this service.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "presentIllness": {
+            "type": "string"
+          },
+          "recommendations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "presentIllness",
+          "chiefComplaint",
+          "diagnosis",
+          "recommendations",
+          "icd10",
+          "illnessDuration",
+          "noteToStaff"
+        ],
+        "type": "object"
+      },
+      "ConsultationSummaryResponse": {
+        "description": "Read response. 200-always tagged enum, mirroring `get_detail`.\n\n- `NotFound`     — booking does not exist, or it is FULFILLED but has no summary note.\n- `NotFulfilled` — booking exists but its appointment status is not FULFILLED.",
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ConsultationSummary"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "Success"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "NotFound"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "NotFulfilled"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "CreateAppointmentRequest": {
+        "properties": {
+          "appointmentEnd": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appointmentNo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "appointmentStart": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appointmentStatus": {
+            "$ref": "#/components/schemas/AppointmentStatus"
+          },
+          "bizCenterId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bizUnitId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingType"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "doctorId": {
+            "$ref": "#/components/schemas/PartialUserIdentity"
+          },
+          "parentAppointmentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patientId": {
+            "$ref": "#/components/schemas/PartialUserIdentity"
+          },
+          "paymentChannels": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/Vec"
+              }
+            ]
+          },
+          "paymentTxId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "paymentTxRefId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "prescreen": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ConsultationPreScreen"
+              }
+            ]
+          },
+          "selectedTimeslot": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CreateAppointmentSelectedTimeslot"
+              }
+            ]
+          },
+          "tenantId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bizUnitId",
+          "bizCenterId",
+          "tenantId",
+          "patientId",
+          "doctorId",
+          "appointmentStart",
+          "appointmentEnd",
+          "appointmentStatus"
+        ],
+        "type": "object"
+      },
+      "CreateAppointmentResult": {
+        "properties": {
+          "appointmentId": {
+            "type": "string"
+          },
+          "appointmentNo": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "bookingId": {
+            "type": "string"
+          },
+          "refCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bookingId",
+          "appointmentId",
+          "refCode"
+        ],
+        "type": "object"
+      },
+      "CreateAppointmentSelectedTimeslot": {
+        "properties": {
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "endEpoch": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startEpoch": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeslotId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "timeslotId",
+          "startEpoch",
+          "endEpoch",
+          "consultationChannel"
+        ],
+        "type": "object"
+      },
+      "CreateConfirmedInstantAppointmentRequest": {
+        "properties": {
+          "bizCenterId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bizUnitId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingType"
+          },
+          "consultDuration": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "doctorId": {
+            "$ref": "#/components/schemas/PartialUserIdentity"
+          },
+          "parentAppointmentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "patientId": {
+            "$ref": "#/components/schemas/PartialUserIdentity"
+          },
+          "paymentChannels": {
+            "$ref": "#/components/schemas/Vec"
+          },
+          "prescreen": {
+            "$ref": "#/components/schemas/ConsultationPreScreen"
+          },
+          "tenantId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bizUnitId",
+          "bizCenterId",
+          "tenantId",
+          "patientId",
+          "doctorId",
+          "prescreen",
+          "paymentChannels"
+        ],
+        "type": "object"
+      },
+      "DateWithTimePeriods": {
+        "properties": {
+          "date": {
+            "example": "2026-05-20",
+            "format": "date",
+            "type": "string"
+          },
+          "periods": {
+            "items": {
+              "$ref": "#/components/schemas/TimePeriod"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "date",
+          "periods"
+        ],
+        "type": "object"
+      },
+      "DoctorIdentity": {
+        "properties": {
+          "doctorAccountId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "doctorId": {
+            "format": "uuid",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "doctorProfileId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "legacyDoctorId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "DoctorRef": {
+        "description": "Doctor reference for a consultation. IDs only — name/specialties are owned elsewhere\nand resolved by the BFF, not this core service.",
+        "properties": {
+          "doctorAccountId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "doctorId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "doctorProfileId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "doctorId",
+          "doctorAccountId",
+          "doctorProfileId"
+        ],
+        "type": "object"
+      },
+      "DrugAllergy": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "displayName"
+        ],
+        "type": "object"
+      },
+      "DurationUnit": {
+        "properties": {
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "unit",
+          "value"
+        ],
+        "type": "object"
+      },
+      "EndSessionRequest": {
+        "properties": {
+          "reasonNote": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "terminationCode": {
+            "$ref": "#/components/schemas/EndSessionTerminateCode"
+          }
+        },
+        "type": "object"
+      },
+      "EndSessionResult": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "EndSession.Success"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "EndSession.SessionNotFound"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "EndSession.Unauthorized"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "EndSessionTerminateCode": {
+        "enum": [
+          "SuccessfulSession",
+          "PatientAbsent",
+          "DoctorAbsent",
+          "BothPartiesAbsent",
+          "TechnicalError",
+          "PatientVerificationMismatch"
+        ],
+        "type": "string"
+      },
+      "EventSource": {
+        "properties": {
+          "service": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "service",
+          "version"
+        ],
+        "type": "object"
+      },
+      "FollowUp": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "AsNeeded"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FollowUpAppointment"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "Appointment"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          }
+        ]
+      },
+      "FollowUpAppointment": {
+        "properties": {
+          "additionalNoteToPatient": {
+            "type": "string"
+          },
+          "appointmentEnd": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "appointmentStart": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "consultationFee": {
+            "format": "double",
+            "type": "number"
+          },
+          "noteToStaff": {
+            "type": "string"
+          },
+          "parentBookingId": {
+            "type": "string"
+          },
+          "visitTypes": {
+            "items": {
+              "$ref": "#/components/schemas/VisitType"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "parentBookingId",
+          "appointmentStart",
+          "appointmentEnd",
+          "visitTypes",
+          "additionalNoteToPatient",
+          "noteToStaff",
+          "consultationChannel",
+          "consultationFee"
+        ],
+        "type": "object"
+      },
+      "GetAppointmentDetailResponse": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentDetail"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "Success"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "AppointmentNotFound"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "GetSessionInfoResult": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SessionReady"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "GetSessionInfoResult.SessionReady"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "GetSessionInfoResult.SessionNotFound"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "GetSessionInfoResult.SessionIsFinished"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "GetSessionInfoResult.SessionIsNotReady"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MeetingProvider"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "GetSessionInfoResult.ProviderIsOutOfService"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "GetSessionInfoResult.Unauthorized"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Icd10": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "description"
+        ],
+        "type": "object"
+      },
+      "InternalBookingRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ReserveRequest"
+          },
+          {
+            "properties": {
+              "patientIdentity": {
+                "$ref": "#/components/schemas/PartialUserIdentity"
+              }
+            },
+            "required": [
+              "patientIdentity"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "ListAppointmentsResponse": {
+        "description": "Read response. 200-always tagged enum, mirroring `get_detail`/`consultation_summary`.\nOnly `Success` exists today; an empty result is `Success` with an empty list.",
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AppointmentList"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "Success"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          }
+        ]
+      },
+      "MeetingProvider": {
+        "enum": [
+          "Twilio",
+          "TokBox"
+        ],
+        "type": "string"
+      },
+      "PartialUserIdentity": {
+        "properties": {
+          "accountId": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "oidcUserId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tenantId": {
+            "format": "int32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "userProfileId": {
+            "format": "int64",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountId",
+          "userProfileId",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "PatientIdVerificationResult": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "PatientIdVerificationResult.Success"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "PatientIdVerificationResult.Endded"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "PatientIdVerificationResult.SessionNotFound"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "PatientIdVerificationResult.SessionStatusNotPermitted"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "PatientIdentity": {
+        "description": "Patient identity with JSON compatibility",
+        "properties": {
+          "accountId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "oidcUserId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tenantId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "userProfileId": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "accountId",
+          "userProfileId",
+          "tenantId"
+        ],
+        "type": "object"
+      },
+      "PatientPrescreen": {
+        "properties": {
+          "allergies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "attachments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "symptom": {
+            "type": "string"
+          },
+          "symptomDuration": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "symptomDurationUnit": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "symptom",
+          "symptomDuration",
+          "symptomDurationUnit",
+          "attachments",
+          "allergies"
+        ],
+        "type": "object"
+      },
+      "PaymentQuote": {
+        "description": "Server-owned immutable payment facts.  This is additive to the legacy\nbooking response so payment producers never derive a price from a mutable\ndoctor profile or a client display value.",
+        "properties": {
+          "amount": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "effectiveServiceConfigVersion": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "amount",
+          "currency",
+          "effectiveServiceConfigVersion"
+        ],
+        "type": "object"
+      },
+      "PrescreenInfo": {
+        "properties": {
+          "allergies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "attachments": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "duration": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "durationUnit": {
+            "type": "string"
+          },
+          "symptom": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "symptom",
+          "duration",
+          "durationUnit",
+          "attachments",
+          "allergies"
+        ],
+        "type": "object"
+      },
+      "ProviderSessionInfo": {
+        "oneOf": [
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TokBoxSessionInfo"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "TokBox"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TwilioSessionInfo"
+              },
+              {
+                "properties": {
+                  "__type": {
+                    "enum": [
+                      "Twilio"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "__type"
+                ],
+                "type": "object"
+              }
+            ]
+          }
+        ]
+      },
+      "PublicBookingRequest": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/ReserveRequest"
+          }
+        ]
+      },
+      "ReserveRequest": {
+        "properties": {
+          "bizCenterId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bizUnitId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "bookingType": {
+            "$ref": "#/components/schemas/BookingType"
+          },
+          "consultationChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "doctorId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "patientIntake": {
+            "$ref": "#/components/schemas/PatientPrescreen"
+          },
+          "timeslot": {
+            "$ref": "#/components/schemas/Timeslot"
+          },
+          "traceId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "doctorId",
+          "bizUnitId",
+          "bizCenterId",
+          "patientIntake",
+          "consultationChannel",
+          "timeslot",
+          "bookingType"
+        ],
+        "type": "object"
+      },
+      "ReserveTimeSlot": {
+        "properties": {
+          "bookingId": {
+            "description": "Public Booking ID projected from the canonical Hold or Appointment occupancy owner.",
+            "type": "string"
+          },
+          "endTime": {
+            "description": "appointment_end as epoch seconds, UTC.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": "appointment_start as epoch seconds, UTC.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bookingId",
+          "startTime",
+          "endTime"
+        ],
+        "type": "object"
+      },
+      "ReservedTimeslotsResponse": {
+        "properties": {
+          "reservedTimeslots": {
+            "items": {
+              "$ref": "#/components/schemas/ReserveTimeSlot"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "reservedTimeslots"
+        ],
+        "type": "object"
+      },
+      "RtdbAccess": {
+        "properties": {
+          "customToken": {
+            "description": "Firebase custom token. The client exchanges it through Firebase Auth;\nit is never an RTDB database-admin credential.",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "customToken",
+          "expiresAt",
+          "path"
+        ],
+        "type": "object"
+      },
+      "ScheduleAvailableConfig": {
+        "properties": {
+          "daysOfWeek": {
+            "additionalProperties": {
+              "items": {
+                "$ref": "#/components/schemas/TimePeriod"
+              },
+              "type": "array"
+            },
+            "propertyNames": {
+              "format": "int32",
+              "type": "integer"
+            },
+            "type": "object"
+          },
+          "specificDate": {
+            "items": {
+              "$ref": "#/components/schemas/DateWithTimePeriods"
+            },
+            "type": "array"
+          },
+          "timezone": {
+            "example": "Asia/Bangkok",
+            "type": "string"
+          }
+        },
+        "required": [
+          "specificDate",
+          "daysOfWeek"
+        ],
+        "type": "object"
+      },
+      "SessionReady": {
+        "properties": {
+          "isFacialVerified": {
+            "type": "boolean"
+          },
+          "isRequiredPatientVerification": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "rtdbAccess": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/RtdbAccess"
+              }
+            ]
+          },
+          "sessionChannel": {
+            "$ref": "#/components/schemas/ConsultationChannel"
+          },
+          "sessionEndTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "sessionInfo": {
+            "$ref": "#/components/schemas/ProviderSessionInfo"
+          },
+          "sessionStartTime": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sessionInfo",
+          "sessionStartTime",
+          "sessionEndTime",
+          "isFacialVerified",
+          "sessionChannel"
+        ],
+        "type": "object"
+      },
+      "SuccessResponse": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "Success"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "SummarizationRequest": {
+        "properties": {
+          "bookingId": {
+            "type": "string"
+          },
+          "chiefComplaint": {
+            "type": "string"
+          },
+          "diagnosis": {
+            "type": "string"
+          },
+          "drugAllergies": {
+            "description": "Doctor-curated drug allergies. `default` so summary notes encrypted before this\nfield existed still deserialize (absent key -> `None`).",
+            "items": {
+              "$ref": "#/components/schemas/DrugAllergy"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "followUp": {
+            "$ref": "#/components/schemas/FollowUp"
+          },
+          "icd10": {
+            "items": {
+              "$ref": "#/components/schemas/Icd10"
+            },
+            "type": "array"
+          },
+          "illnessDuration": {
+            "$ref": "#/components/schemas/DurationUnit"
+          },
+          "noteToStaff": {
+            "type": "string"
+          },
+          "prescriptionId": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "presentIllness": {
+            "type": "string"
+          },
+          "recommendations": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bookingId",
+          "presentIllness",
+          "chiefComplaint",
+          "diagnosis",
+          "recommendations",
+          "icd10",
+          "illnessDuration",
+          "noteToStaff",
+          "followUp"
+        ],
+        "type": "object"
+      },
+      "SummarizationResult": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "SummarizationResult.Success"
+                ],
+                "type": "string"
+              },
+              "bizCenterId": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "bizUnitId": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "patientIdentity": {
+                "$ref": "#/components/schemas/PatientIdentity"
+              },
+              "summaryNoteId": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "summaryNoteId",
+              "patientIdentity",
+              "bizUnitId",
+              "bizCenterId",
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "SummarizationResult.AlreadySubmitted"
+                ],
+                "type": "string"
+              },
+              "bizCenterId": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "bizUnitId": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "patientIdentity": {
+                "$ref": "#/components/schemas/PatientIdentity"
+              },
+              "summaryNoteId": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "summaryNoteId",
+              "patientIdentity",
+              "bizUnitId",
+              "bizCenterId",
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "TimePeriod": {
+        "properties": {
+          "endTime": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "startTime": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime"
+        ],
+        "type": "object"
+      },
+      "Timeslot": {
+        "properties": {
+          "duration": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "end": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "start",
+          "end",
+          "duration"
+        ],
+        "type": "object"
+      },
+      "TokBoxSessionInfo": {
+        "properties": {
+          "appointmentNo": {
+            "type": "string"
+          },
+          "conferenceProviderId": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "sessionId": {
+            "type": "string"
+          },
+          "sessionToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "conferenceProviderId",
+          "sessionId",
+          "sessionToken",
+          "appointmentNo"
+        ],
+        "type": "object"
+      },
+      "TwilioSessionInfo": {
+        "properties": {
+          "sessionChatName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sessionName": {
+            "type": "string"
+          },
+          "sessionToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sessionName",
+          "sessionToken"
+        ],
+        "type": "object"
+      },
+      "UpdateAvailabilityRequest": {
+        "properties": {
+          "available": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "available"
+        ],
+        "type": "object"
+      },
+      "UpdateScheduleConfigResponse": {
+        "oneOf": [
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "Success"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "__type"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "__type": {
+                "enum": [
+                  "Failure.ConflictTimeOverlap"
+                ],
+                "type": "string"
+              },
+              "days": {
+                "items": {
+                  "format": "int32",
+                  "type": "integer"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "days",
+              "__type"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "Vec": {
+        "items": {
+          "oneOf": [
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "Insurance"
+                  ],
+                  "type": "string"
+                },
+                "binding_id": {
+                  "format": "int64",
+                  "type": "integer"
+                },
+                "privilege_id": {
+                  "format": "int32",
+                  "type": "integer"
+                }
+              },
+              "required": [
+                "binding_id",
+                "privilege_id",
+                "__type"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "EmployeeBenefit"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "__type"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "CampaignLocation"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "__type"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "Campaign"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "__type"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "Card"
+                  ],
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "__type"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "PromptPay"
+                  ],
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "__type"
+              ],
+              "type": "object"
+            },
+            {
+              "properties": {
+                "__type": {
+                  "enum": [
+                    "TrueMoney"
+                  ],
+                  "type": "string"
+                },
+                "id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "__type"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "type": "array"
+      },
+      "VisitType": {
+        "enum": [
+          "FollowUp",
+          "LabResult",
+          "PrescriptionRefill"
+        ],
+        "type": "string"
+      }
+    }
+  },
+  "info": {
+    "description": "API for managing consultations and appointments",
+    "license": {
+      "name": ""
+    },
+    "title": "Consultation API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/internal/v1/appointment/{bookingId}": {
+      "get": {
+        "operationId": "get_appointment_detail",
+        "parameters": [
+          {
+            "description": "Appointment booking id",
+            "in": "path",
+            "name": "bookingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAppointmentDetailResponse"
+                }
+              }
+            },
+            "description": "Appointment detail or AppointmentNotFound"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "appointment"
+        ]
+      }
+    },
+    "/internal/v1/appointment/{bookingId}/consultation-summary": {
+      "get": {
+        "operationId": "get_consultation_summary",
+        "parameters": [
+          {
+            "description": "Appointment booking id",
+            "in": "path",
+            "name": "bookingId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsultationSummaryResponse"
+                }
+              }
+            },
+            "description": "Consultation summary, NotFound, or NotFulfilled"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "appointment"
+        ]
+      }
+    },
+    "/internal/v1/appointments": {
+      "get": {
+        "operationId": "list_appointments",
+        "parameters": [
+          {
+            "description": "Patient account id (required)",
+            "in": "query",
+            "name": "patientAccountId",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Patient profile id (optional; narrows to one profile)",
+            "in": "query",
+            "name": "patientProfileId",
+            "required": false,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAppointmentsResponse"
+                }
+              }
+            },
+            "description": "The patient's fulfilled appointments, newest first"
+          },
+          "400": {
+            "description": "Missing or invalid query parameters"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "appointment"
+        ]
+      }
+    },
+    "/internal/v1/booking": {
+      "post": {
+        "operationId": "internal_booking",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternalBookingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            },
+            "description": "Internal booking reservation created"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/internal/v1/booking/{booking_id}/cancel": {
+      "post": {
+        "operationId": "internal_cancel_booking",
+        "parameters": [
+          {
+            "description": "Booking ID",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingCancelResponse"
+                }
+              }
+            },
+            "description": "Appointment Hold released (legacy cancel route and response)"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "409": {
+            "description": "Booking cannot be cancelled"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/internal/v1/booking/{booking_id}/state": {
+      "get": {
+        "operationId": "internal_booking_state",
+        "parameters": [
+          {
+            "description": "Booking ID",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingStateResponse"
+                }
+              }
+            },
+            "description": "Internal booking state"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/v1/booking": {
+      "post": {
+        "operationId": "public_booking",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublicBookingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponse"
+                }
+              }
+            },
+            "description": "Booking reservation created"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/v1/booking/{booking_id}/state": {
+      "get": {
+        "operationId": "public_booking_state",
+        "parameters": [
+          {
+            "description": "Booking ID",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingStateResponse"
+                }
+              }
+            },
+            "description": "Booking state"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Booking not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "booking"
+        ]
+      }
+    },
+    "/v2/consultation-config/availability": {
+      "get": {
+        "operationId": "get_availability",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailabilityResponse"
+                }
+              }
+            },
+            "description": "Consultation availability"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "consultation-config"
+        ]
+      }
+    },
+    "/v2/consultation-config/availability/instant": {
+      "put": {
+        "operationId": "update_instant_availability",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailabilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "description": "Instant availability saved"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "consultation-config"
+        ]
+      }
+    },
+    "/v2/consultation-config/availability/schedule": {
+      "put": {
+        "operationId": "update_schedule_availability",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAvailabilityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "description": "Schedule availability saved"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "consultation-config"
+        ]
+      }
+    },
+    "/v2/consultation-config/schedule-config": {
+      "get": {
+        "operationId": "get_schedule_config",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleAvailableConfig"
+                }
+              }
+            },
+            "description": "Doctor schedule configuration"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "consultation-config"
+        ]
+      },
+      "put": {
+        "operationId": "update_schedule_config",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleAvailableConfig"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateScheduleConfigResponse"
+                }
+              }
+            },
+            "description": "Success or conflict-time-overlap failure"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "consultation-config"
+        ]
+      }
+    },
+    "/v2/consultation/end-session/{booking_id}": {
+      "post": {
+        "operationId": "end_session",
+        "parameters": [
+          {
+            "description": "Booking ID / Appointment ID to end session for",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndSessionResult"
+                }
+              }
+            },
+            "description": "Session ended successfully"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndSessionResult"
+                }
+              }
+            },
+            "description": "Unauthorized - user is not a doctor"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EndSessionResult"
+                }
+              }
+            },
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "consultation"
+        ]
+      }
+    },
+    "/v2/consultation/facial-upload/{booking_id}": {
+      "post": {
+        "operationId": "facial_upload",
+        "parameters": [
+          {
+            "description": "Booking ID / Appointment ID for facial screenshot upload",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "description": "Multipart form data with 'file' or 'image' field containing the image data",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddConsultationScreenshot"
+                }
+              }
+            },
+            "description": "Facial screenshot uploaded successfully"
+          },
+          "400": {
+            "description": "Bad request - malformed multipart data or no file provided"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddConsultationScreenshot"
+                }
+              }
+            },
+            "description": "Unauthorized - user does not belong to this consultation"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddConsultationScreenshot"
+                }
+              }
+            },
+            "description": "Conflict - screenshot already uploaded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "consultation"
+        ]
+      }
+    },
+    "/v2/consultation/patient-id-verify-match/{booking_id}": {
+      "post": {
+        "operationId": "match_handle",
+        "parameters": [
+          {
+            "description": "Booking ID / Appointment ID for patient verification match",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientIdVerificationResult"
+                }
+              }
+            },
+            "description": "Patient ID verification match recorded successfully"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientIdVerificationResult"
+                }
+              }
+            },
+            "description": "Unauthorized - user is not a doctor or session status not permitted"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientIdVerificationResult"
+                }
+              }
+            },
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "consultation"
+        ]
+      }
+    },
+    "/v2/consultation/patient-id-verify-miss-match/{booking_id}": {
+      "post": {
+        "operationId": "miss_match_handle",
+        "parameters": [
+          {
+            "description": "Booking ID / Appointment ID for patient verification mismatch",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientIdVerificationResult"
+                }
+              }
+            },
+            "description": "Patient ID verification mismatch recorded successfully"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientIdVerificationResult"
+                }
+              }
+            },
+            "description": "Unauthorized - user is not a doctor or session status not permitted"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientIdVerificationResult"
+                }
+              }
+            },
+            "description": "Session not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "consultation"
+        ]
+      }
+    },
+    "/v2/consultation/session-info/{booking_id}": {
+      "get": {
+        "operationId": "get_session_info",
+        "parameters": [
+          {
+            "description": "Booking ID / Appointment ID",
+            "in": "path",
+            "name": "booking_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSessionInfoResult"
+                }
+              }
+            },
+            "description": "Session info retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized - cannot access this session"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "consultation"
+        ]
+      }
+    },
+    "/v2/doctor-timeslot/available-doctors": {
+      "get": {
+        "operationId": "get_available_doctors",
+        "parameters": [
+          {
+            "description": "Local calendar date to search, interpreted in `timezone` as [00:00, next day 00:00).",
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "IANA timezone for interpreting `date`; defaults to Asia/Bangkok.",
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "consultationChannel",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsultationChannel"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailableDoctorsResponse"
+                }
+              }
+            },
+            "description": "Doctors with at least one scheduled availability timeslot on the requested local date"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "doctor-timeslot"
+        ]
+      }
+    },
+    "/v2/doctor-timeslot/available-timeslots": {
+      "get": {
+        "operationId": "get_available_timeslots",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "doctorAccountId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "doctorProfileId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Inclusive start of the query window, RFC-3339.",
+            "in": "query",
+            "name": "from_datetime",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exclusive end of the query window, RFC-3339.",
+            "in": "query",
+            "name": "to_datetime",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "consultationChannel",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsultationChannel"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailableTimeslotResponse"
+                }
+              }
+            },
+            "description": "Available doctor timeslots"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned/inactive"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "doctor-timeslot"
+        ]
+      }
+    },
+    "/v2/doctor-timeslot/scheduled-availability": {
+      "get": {
+        "operationId": "get_scheduled_availability",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "doctor-id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Local calendar date to search, interpreted in `timezone` as [00:00, next day 00:00).",
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "IANA timezone for interpreting `date`; defaults to Asia/Bangkok.",
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "consultationChannel",
+            "required": false,
+            "schema": {
+              "oneOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "$ref": "#/components/schemas/ConsultationChannel"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvailableTimeslotResponse"
+                }
+              }
+            },
+            "description": "Scheduled availability timeslots for a stable doctor ID on the requested local date"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "409": {
+            "description": "Doctor identity not provisioned/inactive"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "doctor-timeslot"
+        ]
+      }
+    },
+    "/v2/internal/create-appointment": {
+      "post": {
+        "operationId": "create_appointment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppointmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAppointmentResult"
+                }
+              }
+            },
+            "description": "Appointment created successfully"
+          },
+          "500": {
+            "description": "Internal server error - database operation failed"
+          }
+        },
+        "tags": [
+          "internal"
+        ]
+      }
+    },
+    "/v2/internal/create-confirmed-appointment": {
+      "post": {
+        "operationId": "create_confirmed_appointment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConfirmedInstantAppointmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "format": "int64",
+                  "type": "integer"
+                }
+              }
+            },
+            "description": "Confirmed appointment created successfully"
+          },
+          "500": {
+            "description": "Internal server error - database operation failed"
+          }
+        },
+        "tags": [
+          "internal"
+        ]
+      }
+    },
+    "/v2/internal/doctor-timeslot/reserved-timeslots": {
+      "get": {
+        "operationId": "get_reserved_timeslots",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "doctorProfileId",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Inclusive start of the query window, RFC-3339 (e.g. 2026-06-17T17:00:00Z).",
+            "in": "query",
+            "name": "from_datetime",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Exclusive end of the query window, RFC-3339 (e.g. 2026-06-18T17:00:00Z).",
+            "in": "query",
+            "name": "to_datetime",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReservedTimeslotsResponse"
+                }
+              }
+            },
+            "description": "Active reserved timeslots for the doctor in the datetime range"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "tags": [
+          "doctor-timeslot"
+        ]
+      }
+    },
+    "/v2/internal/submit-summary-note": {
+      "post": {
+        "operationId": "add_summary_note",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SummarizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SummarizationResult"
+                }
+              }
+            },
+            "description": "Summary note created or already exists"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "tags": [
+          "summarization"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "description": "Appointment management API",
+      "name": "appointment"
+    },
+    {
+      "description": "Booking route adapter vocabulary for canonical Appointment Hold API",
+      "name": "booking"
+    },
+    {
+      "description": "Doctor timeslot API",
+      "name": "doctor-timeslot"
+    },
+    {
+      "description": "Consultation session management API",
+      "name": "consultation"
+    },
+    {
+      "description": "Doctor consultation configuration API",
+      "name": "consultation-config"
+    },
+    {
+      "description": "Internal API for service-to-service communication",
+      "name": "internal"
+    },
+    {
+      "description": "Doctor summary note management API",
+      "name": "summarization"
+    }
+  ]
+}

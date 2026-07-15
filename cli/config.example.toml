@@ -1,0 +1,5 @@
+account_sid = "AC1234567890abcdef"
+api_key_sid = "SK1234567890abcdef"
+api_key_secret = "your_secret_key_here"
+room_name = "my_video_room"
+identity = "user_123"

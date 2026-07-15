@@ -1,0 +1,33 @@
+[package]
+name = "consultation-bg-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+common-rs = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+sqlx = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+base64 = { workspace = true }
+axum = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+urlencoding = "2.1"
+uuid = { workspace = true }
+ed25519-dalek = { version = "2", features = ["default"] }
+hex = "0.4"
+pasetors = { version = "0.7", default-features = false, features = ["std", "v2"] }
+google-cloud-pubsub = "0.30"
+google-cloud-googleapis = "0.16"
+reqwest = { version = "0.13", features = ["json"] }
+rust_decimal = { workspace = true }
+
+[dev-dependencies]
+fs2 = "0.4"
+testcontainers = { workspace = true }
+testcontainers-modules = { workspace = true }

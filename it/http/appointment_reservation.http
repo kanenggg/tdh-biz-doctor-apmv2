@@ -1,0 +1,110 @@
+### Reserve appointment - Success case
+
+POST {{ HOST }}/v2/appointment/reserve HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "doctorId": 1001,
+  "bizUnitId": 1,
+  "bizCenterId": 1,
+  "consultationPrescreen": "video",
+  "consultationChannel": "video",
+  "timeslot": {
+    "start": 1708444800,
+    "end": 1708446600,
+    "duration": 1800
+  },
+  "bookingType": {
+    "__type": "Schedule"
+  },
+  "traceId": "test-trace-id-123"
+}
+
+### Reserve appointment - Video consultation
+
+POST {{ HOST }}/v2/appointment/reserve HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "doctorId": 1001,
+  "bizUnitId": 1,
+  "bizCenterId": 1,
+  "consultationPrescreen": "video",
+  "consultationChannel": "video",
+  "timeslot": {
+    "start": 1708444800,
+    "end": 1708446600,
+    "duration": 1800
+  },
+  "bookingType": {
+    "__type": "Schedule"
+  }
+}
+
+### Reserve appointment - Voice consultation
+
+POST {{ HOST }}/v2/appointment/reserve HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "doctorId": 1001,
+  "bizUnitId": 1,
+  "bizCenterId": 1,
+  "consultationPrescreen": "voice",
+  "consultationChannel": "voice",
+  "timeslot": {
+    "start": 1708444800,
+    "end": 1708446600,
+    "duration": 1800
+  },
+  "bookingType": {
+    "__type": "Schedule"
+  }
+}
+
+### Reserve appointment - Chat consultation
+
+POST {{ HOST }}/v2/appointment/reserve HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "doctorId": 1001,
+  "bizUnitId": 1,
+  "bizCenterId": 1,
+  "consultationPrescreen": "chat",
+  "consultationChannel": "chat",
+  "timeslot": {
+    "start": 1708444800,
+    "end": 1708446600,
+    "duration": 1800
+  },
+  "bookingType": {
+    "__type": "Schedule"
+  }
+}
+
+### Reserve appointment - Instant booking
+
+POST {{ HOST }}/v2/appointment/reserve HTTP/1.1
+Content-Type: application/json
+Tdh-Sec-Iam-User-Identity: {"accountId":3001,"accountType":1,"userProfileId":4001,"userMainProfileId":789,"tenantId":1,"oidcUserId":"test-user"}
+
+{
+  "doctorId": 1001,
+  "bizUnitId": 1,
+  "bizCenterId": 1,
+  "consultationPrescreen": "video",
+  "consultationChannel": "video",
+  "timeslot": {
+    "start": 1708444800,
+    "end": 1708446600,
+    "duration": 1800
+  },
+  "bookingType": {
+    "__type": "Instant"
+  }
+}

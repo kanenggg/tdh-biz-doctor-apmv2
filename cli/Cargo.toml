@@ -1,0 +1,23 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "twilio"
+path = "src/main.rs"
+
+[[bin]]
+name = "openapi"
+path = "src/openapi.rs"
+
+[dependencies]
+clap = { workspace = true }
+common-rs = { workspace = true }
+consultation-rs = { workspace = true }
+anyhow = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = "0.9.8"
+utoipa = { workspace = true }
+serde_yaml = { workspace = true }

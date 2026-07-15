@@ -1,0 +1,10 @@
+{
+  "bookingId": "BK-TEST-20260714-000001",
+  "reserveToken": "BK-TEST-20260714-000001",
+  "status": "Reserved",
+  "paymentQuote": {
+    "amount": "350.00",
+    "currency": "thb",
+    "effectiveServiceConfigVersion": 42
+  }
+}

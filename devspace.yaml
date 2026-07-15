@@ -1,0 +1,379 @@
+version: v2beta1
+name: tdh-biz-doctor-apm
+
+pipelines:
+  # How to use:
+  # - deploy the service ($ devspace run-pipeline <deployment_pipeline_name>)
+  # - start dev ($ devspace run-pipeline <dev_pipeline_name>)
+  # - purge after use ($ devspace purge)
+  # - after purge, you can start dev again by run dev pipeline
+
+  build: |-
+    build_images biz-apm
+  # dev pipelines
+  timeslot-manager-dev:
+    run: |-
+      run_dependencies --all
+      create_deployments timeslot-manager
+      start_dev timeslot-manager
+  timeslot-dev:
+    run:  |-
+      run_dependencies --all       
+      create_deployments timeslot
+      start_dev timeslot
+  consultation-dev:
+    run: |-
+      run_dependencies --all       
+      create_deployments consultation
+      start_dev consultation
+
+  # How deploy-{project} works:
+  # 1. Deploy any projects this project needs (see "dependencies")
+  # 2. Build, tag (git commit hash) and push all images (see "images")
+  # 3. Deploy Helm charts and manifests specified as "deployments"
+
+  # deployment pipelines
+  deploy-timeslot-manager:
+    run: |-
+      run_dependencies --all
+      build_images biz-apm -t $(git describe --always)
+      create_deployments timeslot-manager
+
+  deploy-timeslot:
+    run: |-
+      run_dependencies --all
+      build_images biz-apm -t $(git describe --always) 
+      create_deployments timeslot
+
+  deploy-consultation:
+    run: |-
+      run_dependencies --all
+      build_images biz-apm -t $(git describe --always) 
+      create_deployments consultation
+
+# This is a list of `images` that DevSpace can build for this project
+# We recommend to skip image building during development (devspace dev) as much as possible
+images:
+#  timeslot-manager-sbt:
+#    image: asia-southeast1-docker.pkg.dev/tdg-dh-truehealth-core-nonprod/devspace/biz-apm
+#    dockerfile: ./Dockerfile
+#    context: ./
+#    custom:
+#      command: |-
+#        gcloud builds submit . --config=cloudbuild-devspace.yaml --substitutions=_IMAGENAME=${runtime.images.timeslot-manager-sbt.image},_TAG=${runtime.images.timeslot-manager-sbt.tag}
+
+  biz-apm:
+    image: asia-southeast1-docker.pkg.dev/tdg-dh-truehealth-core-nonprod/devspace/biz-apm
+    dockerfile: ./Dockerfile
+    context: ./
+    custom:
+      command: |-
+        gcloud builds submit . --config=cloudbuild-devspace.yaml --substitutions=_IMAGENAME=${runtime.images.biz-apm.image},_TAG=${runtime.images.biz-apm.tag}
+
+# This is a list of `deployments` that DevSpace can create for this project
+deployments:
+  timeslot-manager:
+    helm:
+      releaseName: devspace-timeslot-manager
+      chart:
+        name: component-chart
+        repo: https://charts.devspace.sh
+      values:
+        annotations:
+          linkerd.io/inject: disabled
+        containers:
+          - image: asia-southeast1-docker.pkg.dev/tdg-dh-truehealth-core-nonprod/devspace/biz-apm
+            name: timeslot-manager
+            imagePullPolicy: Always
+        service:
+          ports:
+            - port: 8081
+        serviceAccountName: tdh-biz-apm-ps
+        nodeSelector:
+          cloud.google.com/gke-spot: "true"
+        tolerations:
+          - key: continuity
+            operator: Equal
+            value: preemptible
+            effect: NoExecute
+
+  timeslot:
+    helm:
+      releaseName: devspace-timeslot
+      chart:
+        name: component-chart
+        repo: https://charts.devspace.sh
+      values:
+        annotations:
+          linkerd.io/inject: disabled
+        containers:
+          - image: asia-southeast1-docker.pkg.dev/tdg-dh-truehealth-core-nonprod/devspace/biz-apm
+            name: timeslot
+            imagePullPolicy: Always
+            resources:
+              requests:
+                cpu: 2000m
+                memory: 4Gi
+            env:
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: status.podIP
+              - name: HTTP_SERVER_PORT
+                value: '8081'
+              - name: JAVA_OPTS
+                value: "-Dcom.sun.management.jmxremote \
+                        -Dcom.sun.management.jmxremote.authenticate=false \
+                        -Dcom.sun.management.jmxremote.ssl=false \
+                        -Dcom.sun.management.jmxremote.local.only=false \
+                        -Dcom.sun.management.jmxremote.port=9010 \
+                        -Dcom.sun.management.jmxremote.rmi.port=9010 \
+                        -Djava.rmi.server.hostname=127.0.0.1"
+            envFrom:
+              - configMapRef:
+                  name: timeslot-config
+              - secretRef:
+                  name: legacy-mordee-redis-cred
+              - secretRef:
+                  name: db-biz-apm-service-rw-cred
+              - secretRef:
+                  name: db-mssql-biz-apm-service-rw-cred
+              - secretRef:
+                  name: payment-public-key
+              - secretRef:
+                  name: pulse-session-key
+              - secretRef:
+                  name: timeslot-reservation-key
+              - secretRef:
+                  name: crypto-dolphin-public-key
+              - secretRef:
+                  name: db-legacy-pg-cred
+        service:
+          ports:
+            - port: '8081'
+        serviceAccountName: apm-timeslot
+        nodeSelector:
+          cloud.google.com/gke-spot: "true"
+        tolerations:
+          - key: continuity
+            operator: Equal
+            value: preemptible
+            effect: NoExecute
+
+  consultation:
+    helm:
+      releaseName: devspace-consultation
+      chart:
+        name: component-chart
+        repo: https://charts.devspace.sh
+      values:
+        annotations:
+          linkerd.io/inject: disabled
+        containers:
+          - image: asia-southeast1-docker.pkg.dev/tdg-dh-truehealth-core-nonprod/devspace/biz-apm
+            name: consultation
+            imagePullPolicy: Always
+            resources:
+              requests:
+                cpu: 2000m
+                memory: 4Gi
+            env:
+              - name: RUNTIME_ENVIRONMENT
+                value: Dev
+              - name: DB_NAME
+                value: biz_apm
+              - name: DB_HOST
+                value: postgresql-turtle.database.svc.cluster.local
+              - name: DB_PORT
+                value: '5432'
+              - name: MSSQL_DB_NAME
+                value: truedigital
+              - name: MSSQL_DB_HOST
+                value: 10.148.15.197
+              - name: MSSQL_DB_PORT
+                value: '1433'
+              - name: REDIS_HOST
+                value: legacy-mordee-redis.database.svc.cluster.local
+              - name: REDIS_PORT
+                value: '6379'
+              - name: HTTP_SERVER_PORT
+                value: '8083'
+              - name: MYSQL_JDBC_URL
+                value: "jdbc:mysql://10.148.15.197:3306/truehealth"
+              - name: MYSQL_DB_SERVICE_RW_USER
+                value: "truehealth-admin"
+              - name: MY_POD_IP
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: status.podIP
+            envFrom:
+              - secretRef:
+                  name: db-biz-apm-service-rw-cred
+              - secretRef:
+                  name: db-mssql-biz-apm-service-rw-cred
+              - secretRef:
+                  name: legacy-mordee-redis-cred
+              - secretRef:
+                  name: twilio-cred
+              - secretRef:
+                  name: legacy-mordee-tokbox-cred
+              - secretRef:
+                  name: consultation-appointment-key
+              - secretRef:
+                  name: tdh-biz-apm-consultation-api-key
+              - secretRef:
+                  name: legacy-mordee-tokbox-cred
+              - secretRef:
+                  name: legacy-mordee-mysql-cred
+        service:
+          ports:
+            - port: 8081
+        serviceAccountName: apm-consultation
+        nodeSelector:
+          cloud.google.com/gke-spot: "true"
+        tolerations:
+          - key: continuity
+            operator: Equal
+            value: preemptible
+            effect: NoExecute
+
+# This is a list of `dev` containers that are based on the containers created by your deployments
+dev:
+  timeslot-manager:
+#    env:
+#      - name: DB_HOST
+#        value: "postgresql-turtle.database.svc.cluster.local"
+    # Search for the container that runs this image
+    name: devspace-timeslot-manager
+    labelSelector:
+      app.kubernetes.io/component: devspace-timeslot-manager
+    container: timeslot-manager
+    namespace: biz-apm
+    restartHelper:
+      inject: false
+    # Sync files between the local filesystem and the development container
+    sync:
+      - path: ./
+        onUpload:
+          restartContainer: false
+        startContainer: false
+        excludeFile: ./.gitignore
+        excludePaths:
+          - ./target
+          - ./.idea
+          - ./.bsp
+          - ./ignite
+          - ./project/target
+          - ./project/project/target
+          - ./.git
+          - ./.sbt
+    # Open a terminal and use the following command to start it
+    terminal:
+      command: ./devspace_start.sh
+    # Make the following commands from my local machine available inside the dev container
+    proxyCommands:
+      - command: devspace
+      - command: kubectl
+      - command: helm
+      - command: git
+    ssh:
+      enabled: false
+    # Forward the following ports to be able to access your application via localhost
+    ports:
+      - port: "8082"
+
+  timeslot:
+    name: devspace-timeslot
+    labelSelector:
+      app.kubernetes.io/component: devspace-timeslot
+    container: timeslot
+    namespace: biz-apm
+    restartHelper:
+      inject: false
+    # Sync files between the local filesystem and the development container
+    sync:
+      - path: ./
+        onUpload:
+          restartContainer: false
+        startContainer: false
+        excludeFile: ./.gitignore
+        excludePaths:
+          - ./target
+          - ./.idea
+          - ./.bsp
+          - ./ignite
+          - ./project/target
+          - ./project/project/target
+          - ./.git
+    # Open a terminal and use the following command to start it
+    terminal:
+      command: ./devspace_start.sh
+    # Make the following commands from my local machine available inside the dev container
+    proxyCommands:
+      - command: devspace
+      - command: kubectl
+      - command: helm
+      - command: git
+    ssh:
+      enabled: false
+    # Forward the following ports to be able to access your application via localhost
+    ports:
+      - port: "8081"
+
+  consultation:
+    #    env:
+    #      - name: DB_HOST
+    #        value: "postgresql-turtle.database.svc.cluster.local"
+    # Search for the container that runs this image
+    name: devspace-consultation
+    labelSelector:
+      app.kubernetes.io/component: devspace-consultation
+    container: consultation
+    namespace: biz-apm
+    restartHelper:
+      inject: false
+    # Sync files between the local filesystem and the development container
+    sync:
+      - path: ./
+        onUpload:
+          restartContainer: false
+        startContainer: false
+        excludeFile: ./.gitignore
+        excludePaths:
+          - ./target
+          - ./.idea
+          - ./.bsp
+          - ./ignite
+          - ./project/target
+          - ./project/project/target
+          - ./.git
+          - ./.sbt
+    # Open a terminal and use the following command to start it
+    terminal:
+      command: ./devspace_start.sh
+    # Make the following commands from my local machine available inside the dev container
+    proxyCommands:
+      - command: devspace
+      - command: kubectl
+      - command: helm
+      - command: git
+    ssh:
+      enabled: false
+    # Forward the following ports to be able to access your application via localhost
+    ports:
+      - port: "8083"
+
+# Use the `commands` section to define repeatable dev workflows for this project
+commands:
+  start:
+    command: |
+      devspace enter -- bash -c 'sbt'
+
+# Define dependencies to other projects with a devspace.yaml
+# dependencies:
+#   api:
+#     git: https://...  # Git-based dependencies
+#     tag: v1.0.0
+#   ui:
+#     path: ./ui        # Path-based dependencies (for monorepos)

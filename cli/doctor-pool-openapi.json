@@ -1,0 +1,185 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Doctor Pool API",
+    "description": "API for managing doctor timeslots and availability",
+    "license": {
+      "name": ""
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/doctors/{id}/timeslots": {
+      "get": {
+        "tags": [
+          "timeslot"
+        ],
+        "operationId": "get_available_timeslots",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Doctor ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start_date",
+            "in": "query",
+            "description": "ISO date string YYYY-MM-DD",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "end_date",
+            "in": "query",
+            "description": "ISO date string YYYY-MM-DD",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available timeslots retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAvailableTimeslotResultSchema"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid date format"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AvailableTimeslotRequest": {
+        "type": "object",
+        "required": [
+          "doctorId",
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "doctorId": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-01-07"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-01-01"
+          }
+        }
+      },
+      "DoctorTimeslotSchema": {
+        "type": "object",
+        "required": [
+          "slotId",
+          "slotDate",
+          "startTime",
+          "endTime"
+        ],
+        "properties": {
+          "endTime": {
+            "type": "string",
+            "example": "10:00:00"
+          },
+          "slotDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-01-01"
+          },
+          "slotId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startTime": {
+            "type": "string",
+            "example": "09:00:00"
+          }
+        }
+      },
+      "GetAvailableTimeslotResultSchema": {
+        "oneOf": [
+          {
+            "type": "object",
+            "required": [
+              "schedules",
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "success"
+                ]
+              },
+              "schedules": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/DoctorTimeslotSchema"
+                }
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "__type"
+            ],
+            "properties": {
+              "__type": {
+                "type": "string",
+                "enum": [
+                  "notAvailableForSchedule"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "TimeslotQueryParams": {
+        "type": "object",
+        "required": [
+          "startDate",
+          "endDate"
+        ],
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "description": "ISO date string `YYYY-MM-DD`"
+          },
+          "startDate": {
+            "type": "string",
+            "description": "ISO date string `YYYY-MM-DD`"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "timeslot",
+      "description": "Doctor timeslot availability API"
+    }
+  ]
+}

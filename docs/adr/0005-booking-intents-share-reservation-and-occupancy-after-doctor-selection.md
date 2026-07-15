@@ -1,0 +1,3 @@
+# Booking intents share reservation and occupancy after doctor selection
+
+Patient-selected booking and campaign ticket booking have different early flows, but they should share the same reservation, booking, and doctor occupancy model once a doctor is selected. Patient-selected booking creates doctor occupancy before payment because the doctor/time is known. Campaign ticket booking validates payment or entitlement and intake first, then enters matching; doctor occupancy is created only after a doctor is matched. This avoids separate conflict systems while supporting paid-first auto-match campaigns.

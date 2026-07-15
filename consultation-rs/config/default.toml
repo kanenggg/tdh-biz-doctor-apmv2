@@ -1,0 +1,72 @@
+# Consultation-RS Default Configuration
+[google_cloud]
+project_id = "tdg-dh-truehealth-core-nonprod"
+facial_upload_bucket = "test-bucket"
+# pubsub_emulator_host = ""
+
+[google_cloud.kms]
+# KMS key resource names. Use full GCP key paths in deployed envs;
+# leave empty for local dev (callers should fall back to LocalAesKms
+# or similar). Test runs source these via env vars.
+doctor_note = ""
+prescreen = ""
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[database]
+user = "postgres_user"
+password = "your_password"
+host = "localhost"
+port = 5432
+database_name = "consultation"
+
+[session]
+lead_time_seconds = 300
+consultation_duration_minutes = 30
+required_appointment_status = "BOOKED"
+skip_chat_biz_unit_id = 2
+
+[twilio]
+account_sid = "ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+api_key_sid = "SKXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+api_key_secret = "your_api_key_secret"
+auth_token = "your_auth_token"
+base_url = "https://twilio.com"
+video_base_url = "https://video.twilio.com/v1/Rooms"
+chat_base_url = "https://conversations.twilio.com/v1/Conversations"
+callback_url = "http://example.com"
+
+[video]
+provider_type = "twilio"
+
+[booking]
+reservation_ttl_seconds = 900
+instant_consultation_duration_sec = 900
+
+# Ed25519 seed||pubkey as 128 hex chars — CHANGE IN PRODUCTION
+paseto_secret_key_hex = "00000000000000000000000000000000000000000000000000000000000000003b6a27bcceb6a42d62a3a8d02a6f0d73653215771de243a63ac048a18b59da29"
+
+# Leave empty to use LocalAesKms. Set to full KMS key resource name for GCP KMS.
+# e.g. "projects/my-project/locations/global/keyRings/my-ring/cryptoKeys/intake-key/cryptoKeyVersions/1"
+kms_key_name = ""
+
+pubsub_topic = "consultation-event-v1"
+# Set to "localhost:8085" in local.toml to use the PubSub emulator
+
+[debug]
+always_available = false
+
+[redis]
+host = "localhost"
+user = "default"
+password = ""
+port = 6379
+
+[follow_up]
+max_days_ahead = 30
+
+[doctor_service_projection]
+# Keep false until the background projection has backfilled every bookable doctor.
+require_v2_snapshot = false

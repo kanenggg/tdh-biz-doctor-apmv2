@@ -1,0 +1,38 @@
+# Configure the Bitbucket Pipelines SSH key with access to private cargo git dependencies.
+
+image: rust:1.93
+
+definitions:
+  caches:
+    cargo-registry: /usr/local/cargo/registry
+    cargo-git: /usr/local/cargo/git
+    cargo-target: target
+
+  steps:
+    - step: &test-rust-workspace
+        name: Test Rust workspace
+        size: 2x
+        caches:
+          - cargo-registry
+          - cargo-git
+          - cargo-target
+        script:
+          - set -eu
+          - apt-get update
+          - apt-get install -y --no-install-recommends openssh-client
+          - mkdir -p "$HOME/.ssh"
+          - ssh-keyscan bitbucket.org >> "$HOME/.ssh/known_hosts"
+          - export CARGO_NET_GIT_FETCH_WITH_CLI=true
+          - cargo test --workspace
+
+pipelines:
+  default:
+    - step: *test-rust-workspace
+
+  pull-requests:
+    "**":
+      - step: *test-rust-workspace
+
+  tags:
+    "**":
+      - step: *test-rust-workspace
