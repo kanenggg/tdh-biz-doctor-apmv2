@@ -1,0 +1,8 @@
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: p-bank
+spec:
+  profile:
+    displayName: อ้ายแบงค์
+  memberOf: []

@@ -6,7 +6,7 @@ metadata:
 spec:
   type: service
   lifecycle: production
-  owner: guests
+  owner: user:default/p-bank
   providesApis:
     - consultation-rs-api
   consumesApis:
@@ -21,7 +21,7 @@ metadata:
 spec:
   type: openapi
   lifecycle: production
-  owner: guests
+  owner: user:default/p-bank
   definition:
     $text: ./specs/provides/consultation-rs.yaml
 
@@ -34,6 +34,6 @@ metadata:
 spec:
   type: openapi
   lifecycle: production
-  owner: guests
+  owner: user:default/p-bank
   definition:
     $text: ./specs/depends-on/walrus-apm-booking-gate.openapi.yaml
