@@ -6,3 +6,13 @@ spec:
   profile:
     displayName: P.bank
   memberOf: []
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: n-kan
+spec:
+  profile:
+    displayName: N.kan
+  memberOf: []

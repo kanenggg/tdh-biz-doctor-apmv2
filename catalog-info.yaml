@@ -11,6 +11,7 @@ spec:
     - consultation-rs-api
   consumesApis:
     - walrus-apm-booking-gate
+    - biz-apm-consultation-event-v2
 
 ---
 apiVersion: backstage.io/v1alpha1
@@ -34,6 +35,19 @@ metadata:
 spec:
   type: openapi
   lifecycle: production
-  owner: user:default/p-bank
+  owner: user:default/n-kan
   definition:
     $text: ./specs/depends-on/walrus-apm-booking-gate.openapi.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: biz-apm-consultation-event-v2
+  description: Biz APM Consultation Event V2
+spec:
+  type: asyncapi
+  lifecycle: experimental
+  owner: user:default/n-kan
+  definition:
+    $text: ./specs/depends-on/biz-apm-consultation-event-v2.asyncapi.yaml
