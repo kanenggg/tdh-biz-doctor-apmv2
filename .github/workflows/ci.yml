@@ -1,0 +1,184 @@
+name: Backstage Catalog Sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/catalog-info.yaml'
+      - 'server/Cargo.toml'
+      - 'server/src/**/*.rs'
+      - 'crates/tdh-protocol/**'
+      - '.github/scripts/parse_catalog.py'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: backstage-catalog-sync-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sync-catalog:
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Python dependencies
+        run: |
+          python3 --version
+          python3 -m venv .venv
+          .venv/bin/python -m pip install pyyaml
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: . -> target
+
+      - name: Generate OpenAPI specification
+        run: cargo run --locked -p server --bin export_openapi -- server/openapi.json
+
+      - name: Validate generated OpenAPI specification
+        run: |
+          python3 - <<'EOF'
+          import json
+
+          with open('server/openapi.json', encoding='utf-8') as file:
+              spec = json.load(file)
+
+          if not spec.get('openapi'):
+              raise SystemExit('❌ generated spec is missing openapi version')
+          if not spec.get('info', {}).get('title'):
+              raise SystemExit('❌ generated spec is missing info.title')
+          if not spec.get('paths'):
+              raise SystemExit('❌ generated spec has no paths')
+
+          print(f"✅ valid OpenAPI spec with {len(spec['paths'])} paths")
+          EOF
+
+      - name: Commit updated OpenAPI specification
+        run: |
+          if [ -z "$(git status --porcelain -- server/openapi.json)" ]; then
+            echo "✅ OpenAPI specification is already up to date"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/openapi.json
+          git commit -m "docs(openapi): update generated specification [skip ci]"
+          git pull --rebase origin main
+          git push origin HEAD:main
+
+      - name: Find all catalog-info.yaml files
+        id: find
+        run: |
+          FILES=$(find . -name "catalog-info.yaml" -not -path "*/node_modules/*" | sort | tr '\n' ' ')
+          if [ -z "$FILES" ]; then
+            echo "❌ ไม่พบไฟล์ catalog-info.yaml"
+            exit 1
+          fi
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
+      - name: Parse catalog (all definition patterns)
+        id: parse
+        run: |
+          python3 .github/scripts/parse_catalog.py ${{ steps.find.outputs.files }} > /tmp/catalog_result.json
+          cat /tmp/catalog_result.json
+
+      - name: Show warnings
+        run: |
+          python3 - <<'EOF'
+          import json
+          data = json.load(open('/tmp/catalog_result.json'))
+          for w in data.get('warnings', []):
+              print(f'⚠️  {w}')
+          if not data.get('warnings'):
+              print('✅ no warnings')
+          EOF
+
+      - name: Fail if referenced spec files are missing
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          data = json.load(open('/tmp/catalog_result.json'))
+          missing = data.get('missing_files', [])
+          if missing:
+              print('❌ spec files referenced in catalog but not found on disk:')
+              for m in missing:
+                  print(f"  {m['entityRef']} -> {m['path']} (resolved: {m['resolved_path']})")
+              sys.exit(1)
+          print('✅ all referenced spec files exist')
+          EOF
+
+      - name: Show definition patterns found
+        run: |
+          python3 - <<'EOF'
+          import json
+          data = json.load(open('/tmp/catalog_result.json'))
+          for e in data['entities']:
+              defn = e.get('definition', {})
+              mode = defn.get('mode', '-')
+              extra = defn.get('path') or defn.get('url', '')
+              print(f"  {e['entityRef']}  [{mode}]  {extra}")
+          EOF
+
+      - name: Trigger Backstage refresh for every entity
+        run: |
+          FAILED=0
+          while IFS= read -r ref; do
+            echo "🔄 Refreshing: $ref"
+            if HTTP_CODE=$(curl -sS -o /tmp/resp.json -w "%{http_code}" \
+              --connect-timeout 10 --max-time 30 \
+              --retry 3 --retry-delay 2 \
+              -X POST "${{ secrets.BACKSTAGE_URL }}/api/catalog/refresh" \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer ${{ secrets.BACKSTAGE_TOKEN }}" \
+              -d "{\"entityRef\": \"$ref\"}"); then
+              :
+            else
+              CURL_EXIT=$?
+              echo "  ❌ Cannot connect to Backstage (curl exit $CURL_EXIT)"
+              FAILED=1
+              continue
+            fi
+
+            if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
+              echo "  ✅ OK ($HTTP_CODE)"
+            elif [ "$HTTP_CODE" -eq 404 ]; then
+              echo "  ⚠️  Not registered yet ($HTTP_CODE) — import via Backstage UI first"
+            else
+              echo "  ❌ Failed ($HTTP_CODE): $(cat /tmp/resp.json)"
+              FAILED=1
+            fi
+          done < <(python3 -c "
+          import json
+          for r in json.load(open('/tmp/catalog_result.json'))['entity_refs']:
+              print(r)
+          ")
+
+          [ "$FAILED" -eq 0 ] || exit 1
+
+      - name: Summary
+        if: always()
+        run: |
+          python3 - <<'EOF' >> $GITHUB_STEP_SUMMARY
+          import json
+          data = json.load(open('/tmp/catalog_result.json'))
+          print("### 📋 Backstage Catalog Sync\n")
+          print("**Entities:**")
+          for e in data['entities']:
+              defn = e.get('definition', {})
+              mode = defn.get('mode')
+              suffix = f" _({mode})_" if mode else ""
+              print(f"- `{e['entityRef']}`{suffix}")
+          print(f"\n**Warnings:** {len(data['warnings'])}")
+          EOF
