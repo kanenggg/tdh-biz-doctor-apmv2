@@ -136,16 +136,25 @@ jobs:
           EOF
 
       - name: Trigger Backstage refresh for every entity
+        env:
+          BACKSTAGE_URL: ${{ secrets.BACKSTAGE_URL }}
+          BACKSTAGE_TOKEN: ${{ secrets.BACKSTAGE_TOKEN }}
         run: |
+          if [ -z "$BACKSTAGE_URL" ] || [ -z "$BACKSTAGE_TOKEN" ]; then
+            echo "::warning::Skipping Backstage refresh because BACKSTAGE_URL or BACKSTAGE_TOKEN is not configured"
+            exit 0
+          fi
+
+          BACKSTAGE_URL="${BACKSTAGE_URL%/}"
           FAILED=0
           while IFS= read -r ref; do
             echo "🔄 Refreshing: $ref"
             if HTTP_CODE=$(curl -sS -o /tmp/resp.json -w "%{http_code}" \
               --connect-timeout 10 --max-time 30 \
               --retry 3 --retry-delay 2 \
-              -X POST "${{ secrets.BACKSTAGE_URL }}/api/catalog/refresh" \
+              -X POST "$BACKSTAGE_URL/api/catalog/refresh" \
               -H "Content-Type: application/json" \
-              -H "Authorization: Bearer ${{ secrets.BACKSTAGE_TOKEN }}" \
+              -H "Authorization: Bearer $BACKSTAGE_TOKEN" \
               -d "{\"entityRef\": \"$ref\"}"); then
               :
             else
