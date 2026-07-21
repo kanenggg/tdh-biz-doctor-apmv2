@@ -42,12 +42,6 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache Rust build
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: . -> target
-          cache-targets: false
-
       - name: Generate OpenAPI specification
         run: cargo run --locked -p cli --bin openapi -- generate --module consultation-rs
 
