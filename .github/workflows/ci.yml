@@ -134,6 +134,7 @@ jobs:
         env:
           BACKSTAGE_URL: ${{ secrets.BACKSTAGE_URL }}
           BACKSTAGE_TOKEN: ${{ secrets.BACKSTAGE_TOKEN }}
+          CATALOG_LOCATION_URL: ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/catalog-info.yaml
         run: |
           if [ -z "$BACKSTAGE_URL" ] || [ -z "$BACKSTAGE_TOKEN" ]; then
             echo "::warning::Skipping Backstage refresh because BACKSTAGE_URL or BACKSTAGE_TOKEN is not configured"
@@ -141,6 +142,31 @@ jobs:
           fi
 
           BACKSTAGE_URL="${BACKSTAGE_URL%/}"
+
+          echo "📚 Registering catalog location: $CATALOG_LOCATION_URL"
+          if REGISTER_CODE=$(curl -sS -o /tmp/register_resp.json -w "%{http_code}" \
+            --connect-timeout 10 --max-time 30 \
+            --retry 3 --retry-delay 2 \
+            -X POST "$BACKSTAGE_URL/api/catalog/locations" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $BACKSTAGE_TOKEN" \
+            -d "{\"type\":\"url\",\"target\":\"$CATALOG_LOCATION_URL\"}"); then
+            :
+          else
+            CURL_EXIT=$?
+            echo "❌ Cannot connect to Backstage location API (curl exit $CURL_EXIT)"
+            exit 1
+          fi
+
+          if [ "$REGISTER_CODE" -ge 200 ] && [ "$REGISTER_CODE" -lt 300 ]; then
+            echo "✅ Catalog location registered ($REGISTER_CODE)"
+          elif [ "$REGISTER_CODE" -eq 409 ]; then
+            echo "✅ Catalog location is already registered ($REGISTER_CODE)"
+          else
+            echo "❌ Failed to register catalog location ($REGISTER_CODE): $(cat /tmp/register_resp.json)"
+            exit 1
+          fi
+
           FAILED=0
           while IFS= read -r ref; do
             echo "🔄 Refreshing: $ref"
