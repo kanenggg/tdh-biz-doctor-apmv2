@@ -176,8 +176,18 @@ jobs:
         run: |
           python3 - <<'EOF' >> $GITHUB_STEP_SUMMARY
           import json
-          data = json.load(open('/tmp/catalog_result.json'))
+          from pathlib import Path
+
           print("### 📋 Backstage Catalog Sync\n")
+
+          result_path = Path('/tmp/catalog_result.json')
+          try:
+              with result_path.open(encoding='utf-8') as file:
+                  data = json.load(file)
+          except (OSError, json.JSONDecodeError) as error:
+              print(f"⚠️ Catalog results unavailable: {error}")
+              raise SystemExit(0)
+
           print("**Entities:**")
           for e in data['entities']:
               defn = e.get('definition', {})
