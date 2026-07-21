@@ -5,9 +5,13 @@ on:
     branches: [main]
     paths:
       - '**/catalog-info.yaml'
-      - 'server/Cargo.toml'
-      - 'server/src/**/*.rs'
-      - 'crates/tdh-protocol/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'cli/Cargo.toml'
+      - 'cli/src/openapi.rs'
+      - 'consultation-rs/Cargo.toml'
+      - 'consultation-rs/src/**/*.rs'
+      - 'common-rs/**'
       - '.github/scripts/parse_catalog.py'
       - '.github/workflows/ci.yml'
   workflow_dispatch: {}
@@ -44,14 +48,14 @@ jobs:
           workspaces: . -> target
 
       - name: Generate OpenAPI specification
-        run: cargo run --locked -p server --bin export_openapi -- server/openapi.json
+        run: cargo run --locked -p cli --bin openapi -- generate --module consultation-rs
 
       - name: Validate generated OpenAPI specification
         run: |
           python3 - <<'EOF'
           import json
 
-          with open('server/openapi.json', encoding='utf-8') as file:
+          with open('specs/provides/consultation-rs.json', encoding='utf-8') as file:
               spec = json.load(file)
 
           if not spec.get('openapi'):
@@ -66,14 +70,14 @@ jobs:
 
       - name: Commit updated OpenAPI specification
         run: |
-          if [ -z "$(git status --porcelain -- server/openapi.json)" ]; then
+          if [ -z "$(git status --porcelain -- specs/provides/consultation-rs.json specs/provides/consultation-rs.yaml)" ]; then
             echo "✅ OpenAPI specification is already up to date"
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add server/openapi.json
+          git add specs/provides/consultation-rs.json specs/provides/consultation-rs.yaml
           git commit -m "docs(openapi): update generated specification [skip ci]"
           git pull --rebase origin main
           git push origin HEAD:main
