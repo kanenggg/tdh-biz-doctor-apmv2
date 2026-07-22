@@ -95,26 +95,6 @@ spec:
   definition:
     $text: ./specs/provides/biz-apm-published-events.asyncapi.yaml
 
----
-apiVersion: backstage.io/v1alpha1
-kind: API
-metadata:
-  name: doctor-profile-events
-  title: Doctor Profile Events
-  description: Doctor profile events consumed by consultation-bg-rs.
-  tags:
-    - asyncapi
-    - gcp-pubsub
-    - doctor-profile
-spec:
-  type: asyncapi
-  lifecycle: production
-  owner: user:default/p-bank
-  system: biz-apm
-  definition:
-    $text: ./specs/depends-on/doctor-profile-approved.asyncapi.yaml
-
----
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
