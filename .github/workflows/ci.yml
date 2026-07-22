@@ -35,11 +35,6 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache Rust build
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: . -> target
-
       - name: Test shared catalog CI
         run: python .github/scripts/test_catalog_ci.py -v
 

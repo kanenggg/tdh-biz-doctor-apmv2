@@ -15,6 +15,14 @@ import parse_catalog
 import catalog_ci
 
 
+class WorkflowTests(unittest.TestCase):
+    def test_self_hosted_workflow_does_not_upload_rust_build_cache(self) -> None:
+        workflow = (SCRIPT_DIR.parent / "workflows" / "ci.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("Swatinem/rust-cache", workflow)
+
+
 class ParseCatalogTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
