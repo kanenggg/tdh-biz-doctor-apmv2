@@ -21,7 +21,7 @@ independent configuration source.
 ## Contract and rollout references
 
 - [DoctorApp-owned `doctor-profile-events` AsyncAPI](https://github.com/kanenggg/tdh-mordee-doctor-app/blob/main/specs/provides/doctor-profile-approved.asyncapi.yaml)
-- [APMv2 Consultation OpenAPI](../specs/provides/consultation-rs.yaml)
-- [APMv2 runtime events AsyncAPI](../specs/provides/biz-apm-published-events.asyncapi.yaml)
+- [APMv2 Consultation OpenAPI](https://github.com/kanenggg/tdh-biz-doctor-apmv2/blob/main/specs/provides/consultation-rs.yaml)
+- [APMv2 runtime events AsyncAPI](https://github.com/kanenggg/tdh-biz-doctor-apmv2/blob/main/specs/provides/biz-apm-published-events.asyncapi.yaml)
 - [Doctor projection rollout](plans/DOCTOR_PROJECTION_SYNC_ROLLOUT.md)
-- [APMv2 Backstage catalog](../catalog-info.yaml)
+- [APMv2 Backstage catalog](https://github.com/kanenggg/tdh-biz-doctor-apmv2/blob/main/catalog-info.yaml)

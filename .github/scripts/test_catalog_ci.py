@@ -15,6 +15,79 @@ import parse_catalog
 import catalog_ci
 
 
+class TechDocsTests(unittest.TestCase):
+    root = SCRIPT_DIR.parents[1]
+
+    @staticmethod
+    def nav_paths(items: list[object]):
+        for item in items:
+            if isinstance(item, str):
+                yield item
+            elif isinstance(item, dict):
+                for value in item.values():
+                    if isinstance(value, str):
+                        yield value
+                    elif isinstance(value, list):
+                        yield from TechDocsTests.nav_paths(value)
+
+    def test_mkdocs_configuration_is_techdocs_compatible(self) -> None:
+        config = yaml.safe_load(
+            (self.root / "mkdocs.yml").read_text(encoding="utf-8")
+        )
+        self.assertEqual("Biz APM Consultation", config["site_name"])
+        self.assertEqual("docs", config["docs_dir"])
+        self.assertIn("techdocs-core", config["plugins"])
+        self.assertEqual("material", config["theme"]["name"])
+        self.assertFalse(config["theme"]["font"])
+
+    def test_curated_navigation_targets_existing_markdown(self) -> None:
+        config = yaml.safe_load(
+            (self.root / "mkdocs.yml").read_text(encoding="utf-8")
+        )
+        paths = list(self.nav_paths(config["nav"]))
+        self.assertIn("index.md", paths)
+        self.assertTrue(paths)
+        for relative_path in paths:
+            self.assertEqual(".md", Path(relative_path).suffix)
+            self.assertTrue(
+                (self.root / "docs" / relative_path).is_file(),
+                relative_path,
+            )
+        self.assertFalse(any(path.startswith("plans/") for path in paths))
+        self.assertFalse(any(path.startswith("superpowers/") for path in paths))
+
+    def test_consultation_component_is_the_only_techdocs_owner(self) -> None:
+        documents = list(
+            yaml.safe_load_all(
+                (self.root / "catalog-info.yaml").read_text(encoding="utf-8")
+            )
+        )
+        owners = [
+            document["metadata"]["name"]
+            for document in documents
+            if document.get("kind") == "Component"
+            and document.get("metadata", {}).get("annotations", {}).get(
+                "backstage.io/techdocs-ref"
+            )
+            == "dir:."
+        ]
+        self.assertEqual(["consultation-rs"], owners)
+
+    def test_curated_docs_do_not_link_outside_mkdocs_source(self) -> None:
+        config = yaml.safe_load(
+            (self.root / "mkdocs.yml").read_text(encoding="utf-8")
+        )
+        escaping_links = []
+        for relative_path in self.nav_paths(config["nav"]):
+            document = self.root / "docs" / relative_path
+            for line_number, line in enumerate(
+                document.read_text(encoding="utf-8").splitlines(), start=1
+            ):
+                if "](../" in line:
+                    escaping_links.append(f"{relative_path}:{line_number}")
+        self.assertEqual([], escaping_links)
+
+
 class WorkflowTests(unittest.TestCase):
     def test_self_hosted_workflow_does_not_upload_rust_build_cache(self) -> None:
         workflow = (SCRIPT_DIR.parent / "workflows" / "ci.yml").read_text(

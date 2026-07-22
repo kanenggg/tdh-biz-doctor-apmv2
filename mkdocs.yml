@@ -1,0 +1,28 @@
+site_name: Biz APM Consultation
+site_description: Architecture, APIs, events, and integrations for Biz APM consultation services.
+docs_dir: docs
+
+theme:
+  name: material
+  font: false
+
+plugins:
+  - techdocs-core
+
+nav:
+  - Overview: index.md
+  - Architecture and Domain:
+      - Appointment Flow: APPOINTMENT_FLOW.md
+      - Consultation Events: CONSULTATION_EVENT.md
+  - APIs and Integration:
+      - DoctorApp Integration: DOCTORAPP_INTEGRATION.md
+      - Star Gate Booking and Timeslot API: star-gate-booking-timeslot-api.md
+      - Doctor Projection Rollout: doctor-service-config-projection-rollout.md
+  - Architecture Decisions:
+      - ADR 0001 - Canonical Core Data: adr/0001-core-service-returns-canonical-data.md
+      - ADR 0002 - Scheduling Owns Shared Availability: adr/0002-shared-doctor-availability-owned-by-scheduling.md
+      - ADR 0003 - Doctor Occupancy Conflicts: adr/0003-booking-conflicts-use-doctor-occupancy-window.md
+      - ADR 0004 - Append-Only Booking Events: adr/0004-booking-state-uses-append-only-events-with-transactional-projections.md
+      - ADR 0005 - Shared Booking Intent Storage: adr/0005-booking-intents-share-reservation-and-occupancy-after-doctor-selection.md
+      - ADR 0006 - Legacy Reservation Storage: adr/0006-appointment-holds-use-legacy-reservation-storage.md
+      - ADR 0007 - Canonical Appointment Hold Domain: adr/0007-appointment-hold-canonical-domain.md

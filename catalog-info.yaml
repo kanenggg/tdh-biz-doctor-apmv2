@@ -8,6 +8,7 @@ metadata:
     availability, patient verification, facial uploads, and summary notes.
   annotations:
     github.com/project-slug: kanenggg/tdh-biz-doctor-apmv2
+    backstage.io/techdocs-ref: dir:.
   tags:
     - rust
     - axum

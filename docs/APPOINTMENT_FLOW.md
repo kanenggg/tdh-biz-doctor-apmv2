@@ -113,7 +113,7 @@ stateDiagram-v2
 
 ## Source map
 
-- Domain terminology: [CONTEXT.md](../CONTEXT.md)
+- Domain terminology: [CONTEXT.md](https://github.com/kanenggg/tdh-biz-doctor-apmv2/blob/main/CONTEXT.md)
 - Hold HTTP boundary and validation: `consultation-rs/src/appointment/hold/handler.rs`, `consultation-rs/src/appointment/hold/create.rs`
 - Hold persistence, quote, and legacy event adapters: `consultation-rs/src/appointment/hold/repo.rs`
 - Payment confirmation: `consultation-bg-rs/src/payment_confirm/service.rs`, `consultation-bg-rs/src/payment_confirm/repo.rs`
