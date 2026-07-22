@@ -48,3 +48,7 @@ bacon consultation-rs-config -- --config-dir /path/to/config
 ```
 
 Configuration is in `bacon.toml` at the workspace root.
+
+## Architecture documentation
+
+- [DoctorApp integration](docs/DOCTORAPP_INTEGRATION.md) — cross-repository ownership and active API/event contracts.
