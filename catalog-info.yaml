@@ -1,28 +1,78 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: tdh-biz-doctor-apmv2
-  description: Consultation API service
+  name: consultation-rs
+  title: Biz APM Consultation API
+  description: >-
+    Axum API service for appointment booking, consultation sessions, doctor
+    availability, patient verification, facial uploads, and summary notes.
+  annotations:
+    github.com/project-slug: kanenggg/tdh-biz-doctor-apmv2
+  tags:
+    - rust
+    - axum
+    - telehealth
+    - consultation
 spec:
   type: service
   lifecycle: production
   owner: user:default/p-bank
+  system: biz-apm
   providesApis:
     - consultation-rs-api
+    - biz-apm-published-events
+  dependsOn:
+    - resource:default/biz-apm-postgresql
+    - resource:default/biz-apm-redis
+    - resource:default/biz-apm-pubsub
+    - resource:default/biz-apm-kms
+    - resource:default/biz-apm-cloud-storage
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: consultation-bg-rs
+  title: Biz APM Consultation Background Service
+  description: >-
+    Background webhook and worker service for payment confirmation, appointment
+    hold expiry, doctor profile projection, and transactional event publishing.
+  annotations:
+    github.com/project-slug: kanenggg/tdh-biz-doctor-apmv2
+  tags:
+    - rust
+    - axum
+    - worker
+    - gcp-pubsub
+spec:
+  type: service
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
+  providesApis:
+    - biz-apm-published-events
   consumesApis:
-    - walrus-apm-booking-gate
-    - biz-apm-consultation-event-v2
+    - doctor-profile-events
+  dependsOn:
+    - resource:default/biz-apm-postgresql
+    - resource:default/biz-apm-pubsub
 
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: consultation-rs-api
-  description: Consultation service API
+  title: Biz APM Consultation API
+  description: HTTP API exposed by consultation-rs.
+  tags:
+    - rest
+    - openapi
+    - consultation
 spec:
   type: openapi
   lifecycle: production
   owner: user:default/p-bank
+  system: biz-apm
   definition:
     $text: ./specs/provides/consultation-rs.yaml
 
@@ -30,24 +80,111 @@ spec:
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: walrus-apm-booking-gate
-  description: Walrus APM booking gate API
+  name: biz-apm-published-events
+  title: Biz APM Published Events
+  description: Runtime Pub/Sub events published by the Biz APM services.
+  tags:
+    - asyncapi
+    - gcp-pubsub
+    - consultation
 spec:
-  type: openapi
+  type: asyncapi
   lifecycle: production
-  owner: user:default/n-kan
+  owner: user:default/p-bank
+  system: biz-apm
   definition:
-    $text: ./specs/depends-on/walrus-apm-booking-gate.openapi.yaml
+    $text: ./specs/provides/biz-apm-published-events.asyncapi.yaml
 
 ---
 apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
-  name: biz-apm-consultation-event-v2
-  description: Biz APM Consultation Event V2
+  name: doctor-profile-events
+  title: Doctor Profile Events
+  description: Doctor profile events consumed by consultation-bg-rs.
+  tags:
+    - asyncapi
+    - gcp-pubsub
+    - doctor-profile
 spec:
   type: asyncapi
-  lifecycle: experimental
-  owner: user:default/n-kan
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
   definition:
-    $text: ./specs/depends-on/biz-apm-consultation-event-v2.asyncapi.yaml
+    $text: ./specs/depends-on/doctor-profile-approved.asyncapi.yaml
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: biz-apm-postgresql
+  description: PostgreSQL data store shared by the Biz APM services.
+spec:
+  type: database
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: biz-apm-redis
+  description: Redis cache used by consultation-rs.
+spec:
+  type: cache
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: biz-apm-pubsub
+  description: Google Cloud Pub/Sub topics and subscriptions used by the Biz APM services.
+spec:
+  type: message-broker
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: biz-apm-kms
+  description: Google Cloud KMS keys used to encrypt and decrypt clinical data.
+spec:
+  type: encryption-key
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: biz-apm-cloud-storage
+  description: Google Cloud Storage used for consultation facial uploads.
+spec:
+  type: object-storage
+  lifecycle: production
+  owner: user:default/p-bank
+  system: biz-apm
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: biz-apm
+  title: Biz APM
+  description: >-
+    Telehealth appointment and consultation system for booking, sessions,
+    doctor availability, clinical summaries, and background event processing.
+  tags:
+    - telehealth
+    - consultation
+spec:
+  owner: user:default/p-bank

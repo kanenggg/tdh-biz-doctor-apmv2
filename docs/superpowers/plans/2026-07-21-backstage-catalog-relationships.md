@@ -32,7 +32,7 @@
 Run:
 
 ```bash
-ruby -e 'require "yaml"; puts YAML.load_stream(File.read("catalog-info.yaml"), aliases: true).length'
+ruby -e 'require "yaml"; puts YAML.load_stream(File.read("catalog-info.yaml")).length'
 ```
 
 Expected: `4`, confirming the existing file parses as four YAML documents.
@@ -239,7 +239,7 @@ spec:
 Run:
 
 ```bash
-ruby -e 'require "yaml"; docs = YAML.load_stream(File.read("catalog-info.yaml"), aliases: true); abort "expected 11 entities" unless docs.length == 11; puts docs.map { |d| "#{d.fetch("kind")}:#{d.fetch("metadata").fetch("name")}" }'
+ruby -e 'require "yaml"; docs = YAML.load_stream(File.read("catalog-info.yaml")); abort "expected 11 entities" unless docs.length == 11; puts docs.map { |d| "#{d.fetch("kind")}:#{d.fetch("metadata").fetch("name")}" }'
 ```
 
 Expected: eleven lines containing two Components, three APIs, five Resources, and one System.
@@ -249,7 +249,7 @@ Expected: eleven lines containing two Components, three APIs, five Resources, an
 Run:
 
 ```bash
-ruby -e 'require "yaml"; docs = YAML.load_stream(File.read("catalog-info.yaml"), aliases: true); ids = docs.map { |d| [d.fetch("kind").downcase, d.fetch("metadata").fetch("namespace", "default"), d.fetch("metadata").fetch("name")].join(":") }; refs = docs.flat_map { |d| s=d.fetch("spec", {}); Array(s["providesApis"]).map { |x| "api:default:#{x}" } + Array(s["consumesApis"]).map { |x| "api:default:#{x}" } + Array(s["dependsOn"]).map { |x| p=x.split(":"); p.length == 2 ? "#{p[0]}:default:#{p[1]}" : p.join(":") } + (s["system"] ? ["system:default:#{s["system"]}"] : []) }; missing=refs.uniq-ids; abort "missing relations: #{missing.join(", ")}" unless missing.empty?; puts "all relations resolve"'
+ruby -e 'require "yaml"; docs = YAML.load_stream(File.read("catalog-info.yaml")); ids = docs.map { |d| [d.fetch("kind").downcase, d.fetch("metadata").fetch("namespace", "default"), d.fetch("metadata").fetch("name")].join(":") }; normalize = ->(kind, ref) { parts=ref.split("/", 2); parts.length == 2 ? "#{kind}:#{parts[0]}:#{parts[1]}" : "#{kind}:default:#{ref}" }; refs = docs.flat_map { |d| s=d.fetch("spec", {}); Array(s["providesApis"]).map { |x| normalize.call("api", x) } + Array(s["consumesApis"]).map { |x| normalize.call("api", x) } + Array(s["dependsOn"]).map { |x| kind, name=x.split(":", 2); normalize.call(kind, name) } + (s["system"] ? [normalize.call("system", s["system"])] : []) }; missing=refs.uniq-ids; abort "missing relations: #{missing.join(", ")}" unless missing.empty?; puts "all relations resolve"'
 ```
 
 Expected: `all relations resolve`.
