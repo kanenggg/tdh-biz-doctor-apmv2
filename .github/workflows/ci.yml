@@ -3,24 +3,16 @@ name: Backstage Catalog Sync
 on:
   push:
     branches: [main]
-    paths:
-      - '**/catalog-info.yaml'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
-      - 'cli/Cargo.toml'
-      - 'cli/src/openapi.rs'
-      - 'consultation-rs/Cargo.toml'
-      - 'consultation-rs/src/**/*.rs'
-      - 'common-rs/**'
-      - '.github/scripts/parse_catalog.py'
-      - '.github/workflows/ci.yml'
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
+env:
+  PYTHONDONTWRITEBYTECODE: "1"
+
 concurrency:
-  group: backstage-catalog-sync-${{ github.ref }}
+  group: backstage-catalog-sync-${{ github.repository }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -30,6 +22,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
+          ref: main
           submodules: recursive
 
       - name: Setup Python dependencies
@@ -42,111 +35,58 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Generate OpenAPI specification
-        run: cargo run --locked -p cli --bin openapi -- generate --module consultation-rs
+      - name: Cache Rust build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: . -> target
 
-      - name: Validate generated OpenAPI specification
+      - name: Test shared catalog CI
+        run: python .github/scripts/test_catalog_ci.py -v
+
+      - name: Sync main before generation
+        run: git pull --rebase origin main
+
+      - name: Generate OpenAPI specifications
+        run: python .github/scripts/catalog_ci.py generate-openapi
+
+      - name: Validate OpenAPI specifications
+        run: python .github/scripts/catalog_ci.py validate-openapi
+
+      - name: Commit updated OpenAPI specifications
         run: |
-          python3 - <<'EOF'
-          import json
-
-          with open('specs/provides/consultation-rs.json', encoding='utf-8') as file:
-              spec = json.load(file)
-
-          if not spec.get('openapi'):
-              raise SystemExit('❌ generated spec is missing openapi version')
-          if not spec.get('info', {}).get('title'):
-              raise SystemExit('❌ generated spec is missing info.title')
-          if not spec.get('paths'):
-              raise SystemExit('❌ generated spec has no paths')
-
-          print(f"✅ valid OpenAPI spec with {len(spec['paths'])} paths")
-          EOF
-
-      - name: Commit updated OpenAPI specification
-        run: |
-          if [ -z "$(git status --porcelain -- specs/provides/consultation-rs.json specs/provides/consultation-rs.yaml)" ]; then
-            echo "✅ OpenAPI specification is already up to date"
+          if ! python .github/scripts/catalog_ci.py artifacts-changed; then
+            echo "✅ OpenAPI specifications are already up to date"
             exit 0
           fi
 
+          while IFS= read -r artifact; do
+            git add -- "$artifact"
+          done < <(python .github/scripts/catalog_ci.py artifact-paths)
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add specs/provides/consultation-rs.json specs/provides/consultation-rs.yaml
-          git commit -m "docs(openapi): update generated specification [skip ci]"
-          git pull --rebase origin main
+          git commit -m "docs(openapi): update generated specifications [skip ci]"
           git push origin HEAD:main
 
-      - name: Find all catalog-info.yaml files
-        id: find
+      - name: Parse and validate all catalogs
         run: |
-          FILES=$(find . -name "catalog-info.yaml" -not -path "*/node_modules/*" | sort | tr '\n' ' ')
-          if [ -z "$FILES" ]; then
-            echo "❌ ไม่พบไฟล์ catalog-info.yaml"
-            exit 1
-          fi
-          echo "files=$FILES" >> $GITHUB_OUTPUT
-
-      - name: Parse catalog (all definition patterns)
-        id: parse
-        run: |
-          python3 .github/scripts/parse_catalog.py ${{ steps.find.outputs.files }} > /tmp/catalog_result.json
+          python .github/scripts/catalog_ci.py catalog-result --output /tmp/catalog_result.json
           cat /tmp/catalog_result.json
 
-      - name: Show warnings
-        run: |
-          python3 - <<'EOF'
-          import json
-          data = json.load(open('/tmp/catalog_result.json'))
-          for w in data.get('warnings', []):
-              print(f'⚠️  {w}')
-          if not data.get('warnings'):
-              print('✅ no warnings')
-          EOF
-
-      - name: Fail if referenced spec files are missing
-        run: |
-          python3 - <<'EOF'
-          import json, sys
-          data = json.load(open('/tmp/catalog_result.json'))
-          missing = data.get('missing_files', [])
-          if missing:
-              print('❌ spec files referenced in catalog but not found on disk:')
-              for m in missing:
-                  print(f"  {m['entityRef']} -> {m['path']} (resolved: {m['resolved_path']})")
-              sys.exit(1)
-          print('✅ all referenced spec files exist')
-          EOF
-
-      - name: Show definition patterns found
-        run: |
-          python3 - <<'EOF'
-          import json
-          data = json.load(open('/tmp/catalog_result.json'))
-          for e in data['entities']:
-              defn = e.get('definition', {})
-              mode = defn.get('mode', '-')
-              extra = defn.get('path') or defn.get('url', '')
-              print(f"  {e['entityRef']}  [{mode}]  {extra}")
-          EOF
-
-      - name: Trigger Backstage refresh for every entity
+      - name: Register catalog and refresh every entity
         env:
           BACKSTAGE_URL: ${{ secrets.BACKSTAGE_URL }}
           BACKSTAGE_TOKEN: ${{ secrets.BACKSTAGE_TOKEN }}
           CATALOG_LOCATION_URL: ${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/catalog-info.yaml
         run: |
           if [ -z "$BACKSTAGE_URL" ] || [ -z "$BACKSTAGE_TOKEN" ]; then
-            echo "::warning::Skipping Backstage refresh because BACKSTAGE_URL or BACKSTAGE_TOKEN is not configured"
+            echo "::warning::Skipping Backstage registration and refresh because BACKSTAGE_URL or BACKSTAGE_TOKEN is not configured"
             exit 0
           fi
 
           BACKSTAGE_URL="${BACKSTAGE_URL%/}"
-
-          echo "📚 Registering catalog location: $CATALOG_LOCATION_URL"
           if REGISTER_CODE=$(curl -sS -o /tmp/register_resp.json -w "%{http_code}" \
-            --connect-timeout 10 --max-time 30 \
-            --retry 3 --retry-delay 2 \
+            --connect-timeout 10 --max-time 30 --retry 3 --retry-delay 2 \
             -X POST "$BACKSTAGE_URL/api/catalog/locations" \
             -H "Content-Type: application/json" \
             -H "Authorization: Bearer $BACKSTAGE_TOKEN" \
@@ -161,22 +101,21 @@ jobs:
           if [ "$REGISTER_CODE" -ge 200 ] && [ "$REGISTER_CODE" -lt 300 ]; then
             echo "✅ Catalog location registered ($REGISTER_CODE)"
           elif [ "$REGISTER_CODE" -eq 409 ]; then
-            echo "✅ Catalog location is already registered ($REGISTER_CODE)"
+            echo "✅ Catalog location already registered ($REGISTER_CODE)"
           else
-            echo "❌ Failed to register catalog location ($REGISTER_CODE): $(cat /tmp/register_resp.json)"
+            echo "❌ Catalog registration failed ($REGISTER_CODE): $(cat /tmp/register_resp.json)"
             exit 1
           fi
 
           FAILED=0
           while IFS= read -r ref; do
             echo "🔄 Refreshing: $ref"
-            if HTTP_CODE=$(curl -sS -o /tmp/resp.json -w "%{http_code}" \
-              --connect-timeout 10 --max-time 30 \
-              --retry 3 --retry-delay 2 \
+            if HTTP_CODE=$(curl -sS -o /tmp/refresh_resp.json -w "%{http_code}" \
+              --connect-timeout 10 --max-time 30 --retry 3 --retry-delay 2 \
               -X POST "$BACKSTAGE_URL/api/catalog/refresh" \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $BACKSTAGE_TOKEN" \
-              -d "{\"entityRef\": \"$ref\"}"); then
+              -d "{\"entityRef\":\"$ref\"}"); then
               :
             else
               CURL_EXIT=$?
@@ -187,42 +126,14 @@ jobs:
 
             if [ "$HTTP_CODE" -ge 200 ] && [ "$HTTP_CODE" -lt 300 ]; then
               echo "  ✅ OK ($HTTP_CODE)"
-            elif [ "$HTTP_CODE" -eq 404 ]; then
-              echo "  ⚠️  Not registered yet ($HTTP_CODE) — import via Backstage UI first"
             else
-              echo "  ❌ Failed ($HTTP_CODE): $(cat /tmp/resp.json)"
+              echo "  ❌ Refresh failed ($HTTP_CODE): $(cat /tmp/refresh_resp.json)"
               FAILED=1
             fi
-          done < <(python3 -c "
-          import json
-          for r in json.load(open('/tmp/catalog_result.json'))['entity_refs']:
-              print(r)
-          ")
+          done < <(python -c 'import json; print("\n".join(json.load(open("/tmp/catalog_result.json"))["entity_refs"]))')
 
           [ "$FAILED" -eq 0 ] || exit 1
 
       - name: Summary
         if: always()
-        run: |
-          python3 - <<'EOF' >> $GITHUB_STEP_SUMMARY
-          import json
-          from pathlib import Path
-
-          print("### 📋 Backstage Catalog Sync\n")
-
-          result_path = Path('/tmp/catalog_result.json')
-          try:
-              with result_path.open(encoding='utf-8') as file:
-                  data = json.load(file)
-          except (OSError, json.JSONDecodeError) as error:
-              print(f"⚠️ Catalog results unavailable: {error}")
-              raise SystemExit(0)
-
-          print("**Entities:**")
-          for e in data['entities']:
-              defn = e.get('definition', {})
-              mode = defn.get('mode')
-              suffix = f" _({mode})_" if mode else ""
-              print(f"- `{e['entityRef']}`{suffix}")
-          print(f"\n**Warnings:** {len(data['warnings'])}")
-          EOF
+        run: python .github/scripts/catalog_ci.py summary --result /tmp/catalog_result.json >> "$GITHUB_STEP_SUMMARY"

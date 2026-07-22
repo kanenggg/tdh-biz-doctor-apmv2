@@ -21,7 +21,7 @@ def entity_ref(entity: dict[str, Any]) -> str | None:
 
 
 def parse_definition(
-    definition: Any, catalog_path: Path, ref: str
+    definition: Any, catalog_path: Path, ref: str, repository_root: Path
 ) -> tuple[dict[str, str], dict[str, str] | None, list[str]]:
     """Return (details, missing_file_entry_or_None, warnings) for a spec.definition value."""
     warnings: list[str] = []
@@ -38,6 +38,11 @@ def parse_definition(
                 return {"mode": "url", "url": raw_path}, None, warnings
             resolved = (catalog_dir / raw_path).resolve()
             details = {"mode": "$text", "path": raw_path, "resolved_path": str(resolved)}
+            try:
+                resolved.relative_to(repository_root.resolve())
+            except ValueError:
+                warnings.append(f"{ref}: local definition escapes repository: {raw_path}")
+                return details, None, warnings
             if not resolved.is_file():
                 return details, {
                     "entityRef": ref,
@@ -53,6 +58,11 @@ def parse_definition(
                 return {"mode": "url", "url": raw_path}, None, warnings
             resolved = (catalog_dir / raw_path).resolve()
             details = {"mode": "$json", "path": raw_path, "resolved_path": str(resolved)}
+            try:
+                resolved.relative_to(repository_root.resolve())
+            except ValueError:
+                warnings.append(f"{ref}: local definition escapes repository: {raw_path}")
+                return details, None, warnings
             if not resolved.is_file():
                 return details, {
                     "entityRef": ref,
@@ -82,7 +92,7 @@ def parse_definition(
 
 
 def parse_file(
-    catalog_path: Path,
+    catalog_path: Path, repository_root: Path,
 ) -> tuple[list[dict[str, Any]], list[dict[str, str]], list[str]]:
     entities: list[dict[str, Any]] = []
     missing_files: list[dict[str, str]] = []
@@ -125,7 +135,7 @@ def parse_file(
         # but any kind is supported so this doesn't silently drop non-API entities).
         if "definition" in spec:
             details, missing, definition_warnings = parse_definition(
-                spec["definition"], catalog_path, ref
+                spec["definition"], catalog_path, ref, repository_root
             )
             entity["definition"] = details
             if missing:
@@ -147,7 +157,7 @@ def main() -> None:
     all_warnings: list[str] = []
 
     for catalog_path in args.catalog_files:
-        entities, missing, warnings = parse_file(catalog_path)
+        entities, missing, warnings = parse_file(catalog_path, Path.cwd().resolve())
         all_entities.extend(entities)
         all_missing.extend(missing)
         all_warnings.extend(warnings)

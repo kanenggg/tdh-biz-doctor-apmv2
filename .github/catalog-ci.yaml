@@ -1,0 +1,11 @@
+version: 1
+openapi:
+  generate:
+    command: [cargo, run, --locked, -p, cli, --bin, openapi, --, generate, --module, consultation-rs]
+  artifacts:
+    - path: specs/provides/consultation-rs.json
+      format: json
+      required_key: openapi
+    - path: specs/provides/consultation-rs.yaml
+      format: yaml
+      required_key: openapi
