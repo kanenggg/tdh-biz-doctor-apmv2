@@ -95,6 +95,7 @@ spec:
   definition:
     $text: ./specs/provides/biz-apm-published-events.asyncapi.yaml
 
+---
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
